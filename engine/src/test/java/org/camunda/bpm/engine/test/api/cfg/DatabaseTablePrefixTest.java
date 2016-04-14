@@ -35,7 +35,7 @@ public class DatabaseTablePrefixTest extends TestCase {
     // both process engines will be using this datasource.
     PooledDataSource pooledDataSource = new PooledDataSource(ReflectUtil.getClassLoader(),
             "org.h2.Driver",
-            "jdbc:h2:mem:DatabaseTablePrefixTest;DB_CLOSE_DELAY=1000",
+            "jdbc:h2:mem:DatabaseTablePrefixTest",
             "sa",
             "" );
 

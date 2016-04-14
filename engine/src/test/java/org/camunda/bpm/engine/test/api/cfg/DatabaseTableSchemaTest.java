@@ -43,7 +43,7 @@ public class DatabaseTableSchemaTest extends TestCase {
 
     // both process engines will be using this datasource.
     PooledDataSource pooledDataSource = new PooledDataSource(ReflectUtil.getClassLoader(), "org.h2.Driver",
-        "jdbc:h2:mem:DatabaseTablePrefixTest;DB_CLOSE_DELAY=1000", "sa", "");
+        "jdbc:h2:mem:DatabaseTablePrefixTest", "sa", "");
 
     Connection connection = pooledDataSource.getConnection();
     connection.createStatement().execute("drop schema if exists " + SCHEMA_NAME);
@@ -73,7 +73,7 @@ public class DatabaseTableSchemaTest extends TestCase {
 
   public void testTablePresentWithSchemaAndPrefix() throws SQLException {
     PooledDataSource pooledDataSource = new PooledDataSource(ReflectUtil.getClassLoader(), "org.h2.Driver",
-        "jdbc:h2:mem:DatabaseTablePrefixTest;DB_CLOSE_DELAY=1000", "sa", "");
+        "jdbc:h2:mem:DatabaseTablePrefixTest", "sa", "");
 
     Connection connection = pooledDataSource.getConnection();
     connection.createStatement().execute("drop schema if exists " + SCHEMA_NAME);

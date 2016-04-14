@@ -7,7 +7,7 @@
   <bean id="processEngineConfiguration" class="org.camunda.bpm.engine.impl.cfg.StandaloneInMemProcessEngineConfiguration">
   
     <!-- Database configurations -->
-    <property name="jdbcUrl" value="jdbc:h2:tcp://non-existing-host/non-existing-db;DB_CLOSE_DELAY=1000" />
+    <property name="jdbcUrl" value="jdbc:h2:tcp://non-existing-host/non-existing-db" />
     
     <!-- job executor configurations -->
     <property name="jobExecutorActivate" value="false" />

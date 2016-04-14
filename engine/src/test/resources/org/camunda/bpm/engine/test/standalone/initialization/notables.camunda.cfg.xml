@@ -8,7 +8,7 @@
   
     <!-- Database configurations -->
     <property name="databaseSchemaUpdate" value="false" />
-    <property name="jdbcUrl" value="jdbc:h2:mem:ProcessEngineInitializationTest;DB_CLOSE_DELAY=1000" />
+    <property name="jdbcUrl" value="jdbc:h2:mem:ProcessEngineInitializationTest" />
     
     <!-- job executor configurations -->
     <property name="jobExecutorActivate" value="false" />

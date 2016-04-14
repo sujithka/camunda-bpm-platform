@@ -1889,14 +1889,14 @@ public class RuntimeServiceTest extends PluggableProcessEngineTestCase {
     // Creating the DB schema (without building a process engine)
     ProcessEngineConfigurationImpl processEngineConfiguration = new StandaloneInMemProcessEngineConfiguration();
     processEngineConfiguration.setProcessEngineName("reboot-test-schema");
-    processEngineConfiguration.setJdbcUrl("jdbc:h2:mem:activiti-reboot-test;DB_CLOSE_DELAY=1000");
+    processEngineConfiguration.setJdbcUrl("jdbc:h2:mem:activiti-reboot-test");
     ProcessEngine schemaProcessEngine = processEngineConfiguration.buildProcessEngine();
 
     // Create process engine and deploy test process
     ProcessEngine processEngine = new StandaloneProcessEngineConfiguration()
       .setProcessEngineName("reboot-test")
       .setDatabaseSchemaUpdate(ProcessEngineConfiguration.DB_SCHEMA_UPDATE_FALSE)
-      .setJdbcUrl("jdbc:h2:mem:activiti-reboot-test;DB_CLOSE_DELAY=1000")
+      .setJdbcUrl("jdbc:h2:mem:activiti-reboot-test")
       .setJobExecutorActivate(false)
       .buildProcessEngine();
 
@@ -1925,7 +1925,7 @@ public class RuntimeServiceTest extends PluggableProcessEngineTestCase {
     processEngine = new StandaloneProcessEngineConfiguration()
       .setProcessEngineName("reboot-test")
       .setDatabaseSchemaUpdate(org.camunda.bpm.engine.ProcessEngineConfiguration.DB_SCHEMA_UPDATE_FALSE)
-      .setJdbcUrl("jdbc:h2:mem:activiti-reboot-test;DB_CLOSE_DELAY=1000")
+      .setJdbcUrl("jdbc:h2:mem:activiti-reboot-test")
       .setJobExecutorActivate(false)
       .buildProcessEngine();
 

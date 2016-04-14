@@ -515,7 +515,7 @@ public class RepositoryServiceTest extends PluggableProcessEngineTestCase {
     ProcessEngine processEngine1 = new StandaloneProcessEngineConfiguration()
       .setProcessEngineName("reboot-test-schema")
       .setDatabaseSchemaUpdate(org.camunda.bpm.engine.ProcessEngineConfiguration.DB_SCHEMA_UPDATE_TRUE)
-      .setJdbcUrl("jdbc:h2:mem:activiti-process-cache-test;DB_CLOSE_DELAY=1000")
+      .setJdbcUrl("jdbc:h2:mem:activiti-process-cache-test")
       .setJobExecutorActivate(false)
       .buildProcessEngine();
     RepositoryService repositoryService1 = processEngine1.getRepositoryService();
@@ -523,7 +523,7 @@ public class RepositoryServiceTest extends PluggableProcessEngineTestCase {
     ProcessEngine processEngine2 = new StandaloneProcessEngineConfiguration()
       .setProcessEngineName("reboot-test")
       .setDatabaseSchemaUpdate(org.camunda.bpm.engine.ProcessEngineConfiguration.DB_SCHEMA_UPDATE_FALSE)
-      .setJdbcUrl("jdbc:h2:mem:activiti-process-cache-test;DB_CLOSE_DELAY=1000")
+      .setJdbcUrl("jdbc:h2:mem:activiti-process-cache-test")
       .setJobExecutorActivate(false)
       .buildProcessEngine();
     RepositoryService repositoryService2 = processEngine2.getRepositoryService();
