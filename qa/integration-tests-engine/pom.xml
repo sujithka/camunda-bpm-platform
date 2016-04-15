@@ -690,7 +690,7 @@
                 <exclude>**/PythonPaClassImportTest.java</exclude>
               </excludes>
               <redirectTestOutputToFile>${redirect.test.output}</redirectTestOutputToFile>
-              <argLine>-XX:MaxPermSize=192m -Xmx512m</argLine>
+              <argLine>-XX:MaxPermSize=320m -Xmx512m</argLine>
             </configuration>
           </plugin>
 
