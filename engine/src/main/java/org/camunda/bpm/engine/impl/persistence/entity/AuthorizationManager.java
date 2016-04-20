@@ -12,25 +12,10 @@
  */
 package org.camunda.bpm.engine.impl.persistence.entity;
 
-import static org.camunda.bpm.engine.authorization.Authorization.ANY;
-import static org.camunda.bpm.engine.authorization.Permissions.CREATE;
-import static org.camunda.bpm.engine.authorization.Permissions.DELETE;
-import static org.camunda.bpm.engine.authorization.Permissions.DELETE_HISTORY;
-import static org.camunda.bpm.engine.authorization.Permissions.DELETE_INSTANCE;
-import static org.camunda.bpm.engine.authorization.Permissions.READ;
-import static org.camunda.bpm.engine.authorization.Permissions.READ_HISTORY;
-import static org.camunda.bpm.engine.authorization.Permissions.READ_INSTANCE;
-import static org.camunda.bpm.engine.authorization.Permissions.READ_TASK;
-import static org.camunda.bpm.engine.authorization.Permissions.UPDATE;
-import static org.camunda.bpm.engine.authorization.Permissions.UPDATE_INSTANCE;
-import static org.camunda.bpm.engine.authorization.Permissions.UPDATE_TASK;
-import static org.camunda.bpm.engine.authorization.Resources.AUTHORIZATION;
-import static org.camunda.bpm.engine.authorization.Resources.DECISION_DEFINITION;
-import static org.camunda.bpm.engine.authorization.Resources.DEPLOYMENT;
-import static org.camunda.bpm.engine.authorization.Resources.PROCESS_DEFINITION;
-import static org.camunda.bpm.engine.authorization.Resources.PROCESS_INSTANCE;
-import static org.camunda.bpm.engine.authorization.Resources.TASK;
-import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotNull;
+import static org.camunda.bpm.engine.authorization.Authorization.*;
+import static org.camunda.bpm.engine.authorization.Permissions.*;
+import static org.camunda.bpm.engine.authorization.Resources.*;
+import static org.camunda.bpm.engine.impl.util.EnsureUtil.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -179,6 +164,30 @@ public class AuthorizationManager extends AbstractManager {
     checkAuthorization(CollectionUtil.asArrayList(permissionChecks));
   }
 
+  public void checkAuthorization(CompositePermissionCheck compositePermissionCheck) {
+    Authentication currentAuthentication = getCurrentAuthentication();
+    CommandContext commandContext = getCommandContext();
+
+    if(isAuthorizationEnabled() && currentAuthentication != null && commandContext.isAuthorizationCheckEnabled()) {
+
+      String userId = currentAuthentication.getUserId();
+      boolean isAuthorized = isAuthorized(userId, currentAuthentication.getGroupIds(), compositePermissionCheck);
+      if (!isAuthorized) {
+
+        List<MissingAuthorization> info = new ArrayList<MissingAuthorization>();
+
+        for (PermissionCheck check: compositePermissionCheck.getAllPermissionChecks()) {
+          info.add(new MissingAuthorization(
+              check.getPermission().getName(),
+              check.getResource().resourceName(),
+              check.getResourceId()));
+        }
+
+        throw new AuthorizationException(userId, info);
+      }
+    }
+  }
+
   public void checkAuthorization(List<PermissionCheck> permissionChecks) {
     Authentication currentAuthentication = getCurrentAuthentication();
     CommandContext commandContext = getCommandContext();
@@ -262,6 +271,16 @@ public class AuthorizationManager extends AbstractManager {
     authCheck.setAuthUserId(userId);
     authCheck.setAuthGroupIds(filteredGroupIds);
     authCheck.setAtomicPermissionChecks(permissionChecks);
+    return getDbEntityManager().selectBoolean("isUserAuthorizedForResource", authCheck);
+  }
+
+  public boolean isAuthorized(String userId, List<String> groupIds, CompositePermissionCheck compositePermissionCheck) {
+    List<String> filteredGroupIds = filterAuthenticatedGroupIds(groupIds);
+
+    AuthorizationCheck authCheck = new AuthorizationCheck();
+    authCheck.setAuthUserId(userId);
+    authCheck.setAuthGroupIds(filteredGroupIds);
+    authCheck.setPermissionChecks(compositePermissionCheck);
     return getDbEntityManager().selectBoolean("isUserAuthorizedForResource", authCheck);
   }
 
@@ -701,9 +720,60 @@ public class AuthorizationManager extends AbstractManager {
 
       String caseExecutionId = task.getCaseExecutionId();
       if (caseExecutionId == null) {
+        // standalone task
         checkAuthorization(UPDATE, TASK, taskId);
       }
 
+    }
+  }
+
+  public void checkTaskWork(TaskEntity task) {
+
+    String taskId = task.getId();
+
+    String executionId = task.getExecutionId();
+    if (executionId != null) {
+
+      CompositePermissionCheck taskWorkPermission = new PermissionCheckBuilder()
+        .disjunctive()
+        .composite()
+          .disjunctive()
+          .atomicCheckForResourceId(TASK, taskId, TASK_WORK)
+          .atomicCheckForResourceId(PROCESS_DEFINITION, task.getProcessDefinition().getKey(), TASK_WORK)
+          .done()
+        .composite()
+          .disjunctive()
+          .atomicCheckForResourceId(TASK, taskId, UPDATE)
+          .atomicCheckForResourceId(PROCESS_DEFINITION, task.getProcessDefinition().getKey(), UPDATE)
+          .done()
+        .build();
+
+      checkAuthorization(taskWorkPermission);
+
+    }
+    else {
+
+      // if task does not exist in context of process
+      // instance, then it is either a (a) standalone task
+      // or (b) it exists in context of a case instance.
+
+      // (a) standalone task: check following permission
+      // - READ on TASK
+      // (b) task in context of a case instance, in this
+      // case it is not necessary to check any permission,
+      // because such tasks can always be updated
+
+      String caseExecutionId = task.getCaseExecutionId();
+      if (caseExecutionId == null) {
+        // standalone task
+        CompositePermissionCheck taskWorkPermission = new PermissionCheckBuilder()
+            .disjunctive()
+            .atomicCheckForResourceId(TASK, taskId, TASK_WORK)
+            .atomicCheckForResourceId(TASK, taskId, UPDATE)
+          .build();
+
+          checkAuthorization(taskWorkPermission);
+      }
     }
   }
 
@@ -1099,5 +1169,6 @@ public class AuthorizationManager extends AbstractManager {
       return new ArrayList<String>(copy);
     }
   }
+
 
 }

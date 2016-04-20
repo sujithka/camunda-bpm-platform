@@ -74,7 +74,10 @@ public enum Permissions implements Permission {
   READ_HISTORY("READ_HISTORY", 4096),
 
   /** Indicates that DELETE_INSTANCE interactions are permitted. */
-  DELETE_HISTORY("DELETE_HISTORY", 8192);
+  DELETE_HISTORY("DELETE_HISTORY", 8192),
+
+  /** Indicates that TASK_WORK interactions are permitted */
+  TASK_WORK("DELETE_HISTORY", 16384);
 
   // 10 additional (32 ... 16384(=2^14)) are reserved
 
@@ -88,6 +91,7 @@ public enum Permissions implements Permission {
     this.id = id;
   }
 
+  @Override
   public String toString() {
     return name;
   }

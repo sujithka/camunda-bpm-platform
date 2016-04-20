@@ -61,6 +61,16 @@ public class PermissionCheckBuilder {
     return this;
   }
 
+  public PermissionCheckBuilder atomicCheckForResourceId(Resource resource, String resourceId, Permission permission) {
+    PermissionCheck permCheck = new PermissionCheck();
+    permCheck.setResource(resource);
+    permCheck.setResourceId(resourceId);
+    permCheck.setPermission(permission);
+    this.atomicChecks.add(permCheck);
+
+    return this;
+  }
+
   public PermissionCheckBuilder composite() {
     return new PermissionCheckBuilder(this);
   }
