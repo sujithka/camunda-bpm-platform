@@ -13,17 +13,7 @@
 
 package org.camunda.bpm.engine.test.util;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.Matchers.lessThanOrEqualTo;
-import static org.junit.Assert.assertThat;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
-
+import junit.framework.AssertionFailedError;
 import org.camunda.bpm.engine.ProcessEngine;
 import org.camunda.bpm.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.camunda.bpm.engine.impl.jobexecutor.JobExecutor;
@@ -38,7 +28,12 @@ import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 
-import junit.framework.AssertionFailedError;
+import java.util.*;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
+import static org.junit.Assert.assertThat;
 
 public class ProcessEngineTestRule extends TestWatcher {
 
@@ -147,6 +142,7 @@ public class ProcessEngineTestRule extends TestWatcher {
           try {
             areJobsAvailable = areJobsAvailable();
           } catch(Throwable t) {
+            t.printStackTrace();
             // Ignore, possible that exception occurs due to locking/updating of table on MSSQL when
             // isolation level doesn't allow READ of the table
           }
@@ -165,7 +161,20 @@ public class ProcessEngineTestRule extends TestWatcher {
   }
 
   protected boolean areJobsAvailable() {
+    System.out.println("Are Jobs available?");
     List<Job> list = processEngine.getManagementService().createJobQuery().list();
+    for (Job job : list) {
+      System.out.println(job);
+    }
+    System.out.println("Deployments available?");
+    List<Deployment> deployments = processEngine.getRepositoryService().createDeploymentQuery().list();
+    for (Deployment deployment : deployments) {
+      System.out.println(deployment);
+    }
+    System.out.println("\n");
+
+
+
     for (Job job : list) {
       if (!job.isSuspended() && job.getRetries() > 0 && (job.getDuedate() == null || ClockUtil.getCurrentTime().after(job.getDuedate()))) {
         return true;

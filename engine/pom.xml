@@ -273,6 +273,7 @@
         <configuration>
           <failIfNoTests>false</failIfNoTests>
           <trimStackTrace>false</trimStackTrace>
+          <runOrder>reversealphabetical</runOrder>
           <redirectTestOutputToFile>true</redirectTestOutputToFile>
           <includes>
            <include>%regex[.*(${test.includes}).*Test.*.class]</include>

@@ -13,19 +13,12 @@
 
 package org.camunda.bpm.engine.test.api.multitenancy;
 
-import static org.hamcrest.CoreMatchers.hasItem;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.assertThat;
-
-import java.util.Calendar;
-import java.util.Date;
-
 import org.camunda.bpm.engine.IdentityService;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.impl.identity.Authentication;
 import org.camunda.bpm.engine.impl.util.ClockUtil;
+import org.camunda.bpm.engine.repository.Deployment;
+import org.camunda.bpm.engine.runtime.Job;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
 import org.camunda.bpm.engine.test.ProcessEngineRule;
 import org.camunda.bpm.engine.test.api.delegate.AssertingJavaDelegate;
@@ -33,9 +26,17 @@ import org.camunda.bpm.engine.test.api.delegate.AssertingJavaDelegate.DelegateEx
 import org.camunda.bpm.engine.test.util.ProcessEngineTestRule;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.assertThat;
 
 public class MultiTenancyJobExecutorTest {
 
@@ -47,6 +48,31 @@ public class MultiTenancyJobExecutorTest {
 
   @Rule
   public RuleChain ruleChain = RuleChain.outerRule(engineRule).around(testRule);
+
+  @Before
+  public void setup() {
+    jobs("setup");
+  }
+
+  @After
+  public void teardown() {
+    jobs("teardown");
+  }
+
+  protected void jobs(String phase) {
+    System.out.println(phase);
+    List<Job> jobs = engineRule.getManagementService().createJobQuery().list();
+    for (Job job : jobs) {
+      System.out.println(job);
+    }
+    System.out.println("\n");
+    System.out.println("Deployments");
+    List<Deployment> deployments = engineRule.getRepositoryService().createDeploymentQuery().list();
+    for (Deployment deployment : deployments) {
+      System.out.println(deployment);
+    }
+    System.out.println("\n");
+  }
 
   @Test
   public void setAuthenticatedTenantForTimerStartEvent() {
