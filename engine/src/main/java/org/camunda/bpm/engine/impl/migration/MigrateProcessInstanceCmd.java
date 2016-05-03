@@ -28,7 +28,7 @@ import org.camunda.bpm.engine.impl.ProcessEngineLogger;
 import org.camunda.bpm.engine.impl.cfg.CommandChecker;
 import org.camunda.bpm.engine.impl.context.Context;
 import org.camunda.bpm.engine.impl.history.event.HistoryEvent;
-import org.camunda.bpm.engine.impl.history.handler.HistoryEventHandler;
+import org.camunda.bpm.engine.impl.history.event.HistoryEventProcessor;
 import org.camunda.bpm.engine.impl.history.producer.HistoryEventProducer;
 import org.camunda.bpm.engine.impl.interceptor.CommandContext;
 import org.camunda.bpm.engine.impl.migration.instance.MigratingActivityInstance;
@@ -52,6 +52,20 @@ import org.camunda.bpm.engine.impl.tree.FlowScopeWalker;
 import org.camunda.bpm.engine.impl.tree.ReferenceWalker;
 import org.camunda.bpm.engine.impl.tree.TreeVisitor;
 import org.camunda.bpm.engine.migration.MigrationPlan;
+import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotEmpty;
+import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotNull;
+import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotEmpty;
+import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotNull;
+import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotEmpty;
+import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotNull;
+import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotEmpty;
+import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotNull;
+import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotEmpty;
+import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotNull;
+import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotEmpty;
+import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotNull;
+import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotEmpty;
+import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotNull;
 
 /**
  * How migration works:
@@ -118,7 +132,7 @@ public class MigrateProcessInstanceCmd extends AbstractMigrationCmd<Void> {
   public Void migrateProcessInstance(CommandContext commandContext, String processInstanceId, MigrationPlan migrationPlan, ProcessDefinitionEntity targetProcessDefinition) {
     ensureNotNull(BadUserRequestException.class, "Process instance id cannot be null", "process instance id", processInstanceId);
 
-    ExecutionEntity processInstance = commandContext.getExecutionManager().findExecutionById(processInstanceId);
+    final ExecutionEntity processInstance = commandContext.getExecutionManager().findExecutionById(processInstanceId);
 
     ensureProcessInstanceExist(processInstanceId, processInstance);
     ensureSameProcessDefinition(processInstance, migrationPlan.getSourceProcessDefinitionId());
@@ -141,10 +155,12 @@ public class MigrateProcessInstanceCmd extends AbstractMigrationCmd<Void> {
     migrateProcessInstance(migratingProcessInstance);
 
     //Create historic event for migration of process instance
-    HistoryEventProducer historyEventProducter = Context.getProcessEngineConfiguration().getHistoryEventProducer();
-    HistoryEventHandler historyEventHandler = Context.getProcessEngineConfiguration().getHistoryEventHandler();
-    HistoryEvent migrateProcessInstanceEvent = historyEventProducter.createProcessInstanceUpdateEvt(processInstance);
-    historyEventHandler.handleEvent(migrateProcessInstanceEvent);
+    HistoryEventProcessor.processHistoryEvent(new HistoryEventProcessor.HistoryEventCreator() {
+      @Override
+      public HistoryEvent createHistoryEvent(HistoryEventProducer producer) {
+        return producer.createProcessInstanceUpdateEvt(processInstance);
+      }
+    });
 
     return null;
   }

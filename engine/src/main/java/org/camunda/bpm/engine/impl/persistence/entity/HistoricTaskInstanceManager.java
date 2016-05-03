@@ -27,11 +27,19 @@ import org.camunda.bpm.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.camunda.bpm.engine.impl.context.Context;
 import org.camunda.bpm.engine.impl.history.HistoryLevel;
 import org.camunda.bpm.engine.impl.history.event.HistoryEvent;
+import org.camunda.bpm.engine.impl.history.event.HistoryEventProcessor;
 import org.camunda.bpm.engine.impl.history.event.HistoryEventTypes;
 import org.camunda.bpm.engine.impl.history.handler.HistoryEventHandler;
 import org.camunda.bpm.engine.impl.history.producer.HistoryEventProducer;
 import org.camunda.bpm.engine.impl.interceptor.CommandContext;
 import org.camunda.bpm.engine.impl.persistence.AbstractHistoricManager;
+import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotNull;
+import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotNull;
+import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotNull;
+import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotNull;
+import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotNull;
+import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotNull;
+import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotNull;
 
 
 /**
@@ -122,7 +130,7 @@ public class HistoricTaskInstanceManager extends AbstractHistoricManager {
         commandContext
           .getHistoricIdentityLinkManager()
           .deleteHistoricIdentityLinksLogByTaskId(taskId);
-        
+
         getDbEntityManager().delete(historicTaskInstance);
       }
     }
@@ -139,52 +147,53 @@ public class HistoricTaskInstanceManager extends AbstractHistoricManager {
     return (Long) getDbEntityManager().selectOne("selectHistoricTaskInstanceCountByNativeQuery", parameterMap);
   }
 
-  public void updateHistoricTaskInstance(TaskEntity taskEntity) {
+  public void updateHistoricTaskInstance(final TaskEntity taskEntity) {
     ProcessEngineConfigurationImpl configuration = Context.getProcessEngineConfiguration();
 
     HistoryLevel historyLevel = configuration.getHistoryLevel();
     if(historyLevel.isHistoryEventProduced(HistoryEventTypes.TASK_INSTANCE_UPDATE, taskEntity)) {
 
-      final HistoryEventProducer eventProducer = configuration.getHistoryEventProducer();
-      final HistoryEventHandler eventHandler = configuration.getHistoryEventHandler();
-
-      HistoryEvent evt = eventProducer.createTaskInstanceUpdateEvt(taskEntity);
-      eventHandler.handleEvent(evt);
-
+      HistoryEventProcessor.processHistoryEvent(new HistoryEventProcessor.HistoryEventCreator() {
+        @Override
+        public HistoryEvent createHistoryEvent(HistoryEventProducer producer) {
+          return producer.createTaskInstanceUpdateEvt(taskEntity);
+        }
+      });
     }
   }
 
-  public void markTaskInstanceEnded(String taskId, String deleteReason) {
+  public void markTaskInstanceEnded(String taskId, final String deleteReason) {
     ProcessEngineConfigurationImpl configuration = Context.getProcessEngineConfiguration();
 
-    TaskEntity taskEntity = Context.getCommandContext()
+    final TaskEntity taskEntity = Context.getCommandContext()
         .getDbEntityManager()
         .selectById(TaskEntity.class, taskId);
 
     HistoryLevel historyLevel = configuration.getHistoryLevel();
     if(historyLevel.isHistoryEventProduced(HistoryEventTypes.TASK_INSTANCE_COMPLETE, taskEntity)) {
 
-      final HistoryEventProducer eventProducer = configuration.getHistoryEventProducer();
-      final HistoryEventHandler eventHandler = configuration.getHistoryEventHandler();
-
-      HistoryEvent evt = eventProducer.createTaskInstanceCompleteEvt(taskEntity, deleteReason);
-
-      eventHandler.handleEvent(evt);
+      HistoryEventProcessor.processHistoryEvent(new HistoryEventProcessor.HistoryEventCreator() {
+        @Override
+        public HistoryEvent createHistoryEvent(HistoryEventProducer producer) {
+          return producer.createTaskInstanceCompleteEvt(taskEntity, deleteReason);
+        }
+      });
     }
   }
 
 
-  public void createHistoricTask(TaskEntity task) {
+  public void createHistoricTask(final TaskEntity task) {
     ProcessEngineConfigurationImpl configuration = Context.getProcessEngineConfiguration();
 
     HistoryLevel historyLevel = configuration.getHistoryLevel();
     if(historyLevel.isHistoryEventProduced(HistoryEventTypes.TASK_INSTANCE_CREATE, task)) {
 
-      final HistoryEventProducer eventProducer = configuration.getHistoryEventProducer();
-      final HistoryEventHandler eventHandler = configuration.getHistoryEventHandler();
-
-      HistoryEvent evt = eventProducer.createTaskInstanceCreateEvt(task);
-      eventHandler.handleEvent(evt);
+      HistoryEventProcessor.processHistoryEvent(new HistoryEventProcessor.HistoryEventCreator() {
+        @Override
+        public HistoryEvent createHistoryEvent(HistoryEventProducer producer) {
+          return producer.createTaskInstanceCreateEvt(task);
+        }
+      });
 
     }
   }

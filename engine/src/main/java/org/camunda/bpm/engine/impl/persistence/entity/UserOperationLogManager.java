@@ -22,6 +22,7 @@ import org.camunda.bpm.engine.impl.UserOperationLogQueryImpl;
 import org.camunda.bpm.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.camunda.bpm.engine.impl.context.Context;
 import org.camunda.bpm.engine.impl.history.event.HistoryEvent;
+import org.camunda.bpm.engine.impl.history.event.HistoryEventProcessor;
 import org.camunda.bpm.engine.impl.history.event.UserOperationLogEntryEventEntity;
 import org.camunda.bpm.engine.impl.history.handler.HistoryEventHandler;
 import org.camunda.bpm.engine.impl.history.producer.HistoryEventProducer;
@@ -58,16 +59,15 @@ public class UserOperationLogManager extends AbstractHistoricManager {
     }
   }
 
-  protected void fireUserOperationLog(UserOperationLogContext context) {
+  protected void fireUserOperationLog(final UserOperationLogContext context) {
     context.setUserId(getAuthenticatedUserId());
 
-    ProcessEngineConfigurationImpl configuration = Context.getProcessEngineConfiguration();
-
-    HistoryEventProducer eventProducer = configuration.getHistoryEventProducer();
-    HistoryEventHandler eventHandler = configuration.getHistoryEventHandler();
-
-    List<HistoryEvent> historyEvents = eventProducer.createUserOperationLogEvents(context);
-    eventHandler.handleEvents(historyEvents);
+    HistoryEventProcessor.processHistoryEvents(new HistoryEventProcessor.HistoryEventsCreator() {
+      @Override
+      public List<HistoryEvent> createHistoryEvents(HistoryEventProducer producer) {
+        return producer.createUserOperationLogEvents(context);
+      }
+    });
   }
 
   public void logUserOperations(UserOperationLogContext context) {
