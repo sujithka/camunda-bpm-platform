@@ -12,8 +12,6 @@
  */
 package org.camunda.bpm.engine.impl.migration;
 
-import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotEmpty;
-import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotNull;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -54,18 +52,6 @@ import org.camunda.bpm.engine.impl.tree.TreeVisitor;
 import org.camunda.bpm.engine.migration.MigrationPlan;
 import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotEmpty;
 import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotNull;
-import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotEmpty;
-import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotNull;
-import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotEmpty;
-import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotNull;
-import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotEmpty;
-import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotNull;
-import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotEmpty;
-import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotNull;
-import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotEmpty;
-import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotNull;
-import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotEmpty;
-import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotNull;
 
 /**
  * How migration works:
@@ -78,7 +64,7 @@ import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotNull;
  *   <li>Migrate and create activity instances. Creation invokes execution listeners
  *       and io mappings. This is performed in a top-down fashion in the activity instance tree and
  *       ensures that the "upstream" tree is always consistent with respect to the new process definition.
- *
+ * </ol>
  * @author Thorben Lindhauer
  */
 public class MigrateProcessInstanceCmd extends AbstractMigrationCmd<Void> {

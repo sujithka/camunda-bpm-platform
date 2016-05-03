@@ -30,6 +30,8 @@ import org.camunda.bpm.engine.history.HistoricProcessInstance;
 import org.camunda.bpm.engine.history.HistoricProcessInstanceQuery;
 import org.camunda.bpm.engine.history.HistoricTaskInstance;
 import org.camunda.bpm.engine.history.HistoricTaskInstanceQuery;
+import org.camunda.bpm.engine.history.HistoricVariableInstance;
+import org.camunda.bpm.engine.history.HistoricVariableInstanceQuery;
 import org.camunda.bpm.engine.migration.MigrationPlan;
 import org.camunda.bpm.engine.repository.ProcessDefinition;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
@@ -42,7 +44,6 @@ import org.camunda.bpm.engine.test.api.runtime.migration.models.ProcessModels;
 import org.camunda.bpm.engine.test.util.ProvidedProcessEngineRule;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
@@ -76,12 +77,14 @@ public class MigrationHistoryProcessInstanceTest {
 
 
     sourceProcessDefinition = testHelper.deployAndGetDefinition(ProcessModels.ONE_TASK_PROCESS);
+
     ModifiableBpmnModelInstance modifiedModel = modify(ProcessModels.ONE_TASK_PROCESS).changeElementId("Process", "Process2")
                                                                                       .changeElementId("userTask", "userTask2");
     targetProcessDefinition = testHelper.deployAndGetDefinition(modifiedModel);
-    migrationPlan = runtimeService.createMigrationPlan(sourceProcessDefinition.getId(), targetProcessDefinition.getId())
-                                                                                            .mapActivities("userTask", "userTask2")
-                                                                                            .build();
+    migrationPlan = runtimeService.createMigrationPlan(sourceProcessDefinition.getId(),
+                                                       targetProcessDefinition.getId())
+                                  .mapActivities("userTask", "userTask2")
+                                  .build();
     runtimeService.startProcessInstanceById(sourceProcessDefinition.getId());
   }
 
@@ -272,5 +275,26 @@ public class MigrationHistoryProcessInstanceTest {
     HistoricTaskInstance instance = targetHistoryTaskInstanceQuery.singleResult();
     assertEquals(instance.getProcessDefinitionKey(), targetProcessDefinition.getKey());
     assertEquals(instance.getProcessDefinitionId(), targetProcessDefinition.getId());
+  }
+
+  @Test
+  @RequiredHistoryLevel(ProcessEngineConfiguration.HISTORY_ACTIVITY)
+  public void testMigrateHistoryVariableInstance() {
+    //given
+    ProcessInstanceQuery sourceProcessInstanceQuery = runtimeService.createProcessInstanceQuery().processDefinitionId(sourceProcessDefinition.getId());
+    runtimeService.setVariable(sourceProcessInstanceQuery.singleResult().getId(), "test", 3537);
+    HistoricVariableInstance instance = historyService.createHistoricVariableInstanceQuery().singleResult();
+
+    //when
+    runtimeService.newMigration(migrationPlan)
+      .processInstanceQuery(sourceProcessInstanceQuery)
+      .execute();
+
+    //then
+    HistoricVariableInstance migratedInstance = historyService.createHistoricVariableInstanceQuery().singleResult();
+    assertEquals(migratedInstance.getProcessDefinitionKey(), targetProcessDefinition.getKey());
+    assertEquals(migratedInstance.getProcessDefinitionId(), targetProcessDefinition.getId());
+    assertEquals(instance.getActivityInstanceId(), migratedInstance.getActivityInstanceId());
+    assertEquals(instance.getExecutionId(), migratedInstance.getExecutionId());
   }
 }

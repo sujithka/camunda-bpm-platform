@@ -12,6 +12,9 @@
  */
 package org.camunda.bpm.engine.impl.migration.instance;
 
+import org.camunda.bpm.engine.impl.history.event.HistoryEvent;
+import org.camunda.bpm.engine.impl.history.event.HistoryEventProcessor;
+import org.camunda.bpm.engine.impl.history.producer.HistoryEventProducer;
 import org.camunda.bpm.engine.impl.persistence.entity.ExecutionEntity;
 import org.camunda.bpm.engine.impl.persistence.entity.VariableInstanceEntity;
 import org.camunda.bpm.engine.impl.pvm.process.ScopeImpl;
@@ -63,7 +66,12 @@ public class MigratingVariableInstance implements MigratingInstance {
 
   @Override
   public void migrateState() {
-    // nothing to do
+    HistoryEventProcessor.processHistoryEvent(new HistoryEventProcessor.HistoryEventCreator() {
+      @Override
+      public HistoryEvent createHistoryEvent(HistoryEventProducer producer) {
+        return producer.createHistoricVariableUpdateEvt(variable, null);
+      }
+    });
   }
 
   @Override
