@@ -14,6 +14,7 @@
 package org.camunda.bpm.engine.test.bpmn.deployment;
 
 import java.io.InputStream;
+import java.sql.SQLException;
 import java.util.List;
 
 import org.camunda.bpm.engine.ProcessEngineException;
@@ -32,6 +33,7 @@ import org.camunda.bpm.engine.repository.Resource;
 import org.camunda.bpm.engine.test.Deployment;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
+import org.h2.tools.Script;
 
 
 /**
@@ -194,13 +196,22 @@ public class BpmnDeploymentTest extends PluggableProcessEngineTestCase {
   }
 
 
-  public void testPartialChangesRedeployOldVersion() {
+  public void testPartialChangesRedeployOldVersion() throws SQLException {
+
+    String jdbcUrl = processEngineConfiguration.getJdbcUrl();
+    String jdbcUsername = processEngineConfiguration.getJdbcUsername();
+    String jdbcPassword = processEngineConfiguration.getJdbcPassword();
+
+    Script.execute(jdbcUrl, jdbcUsername, jdbcPassword, "target/h2-dump-1.txt");
+
     // deployment 1 deploys process version 1
     BpmnModelInstance model1 = Bpmn.createExecutableProcess("process1").done();
     org.camunda.bpm.engine.repository.Deployment deployment1 = repositoryService.createDeployment()
       .addModelInstance("process1.bpmn20.xml", model1)
       .name("deployment")
       .deploy();
+
+    Script.execute(jdbcUrl, jdbcUsername, jdbcPassword, "target/h2-dump-2.txt");
 
     // deployment 2 deploys process version 2
     BpmnModelInstance changedModel1 = Bpmn.createExecutableProcess("process1").startEvent().done();
@@ -210,12 +221,16 @@ public class BpmnDeploymentTest extends PluggableProcessEngineTestCase {
       .name("deployment")
       .deploy();
 
+    Script.execute(jdbcUrl, jdbcUsername, jdbcPassword, "target/h2-dump-3.txt");
+
     // deployment 3 deploys process version 1 again
     org.camunda.bpm.engine.repository.Deployment deployment3 = repositoryService.createDeployment()
       .enableDuplicateFiltering(true)
       .addModelInstance("process1.bpmn20.xml", model1)
       .name("deployment")
       .deploy();
+
+    Script.execute(jdbcUrl, jdbcUsername, jdbcPassword, "target/h2-dump-4.txt");
 
     // should result in three process definitions
     assertEquals(3, repositoryService.createProcessDefinitionQuery().processDefinitionKey("process1").count());
