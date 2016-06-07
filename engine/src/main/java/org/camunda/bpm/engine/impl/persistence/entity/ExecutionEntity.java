@@ -587,7 +587,7 @@ public class ExecutionEntity extends PvmExecutionImpl implements Execution, Proc
     }
 
     Context
-      .getCommandContext()
+      .getCommandInvocationContext()
       .performOperation(executionOperation, this, async);
   }
 
@@ -597,7 +597,7 @@ public class ExecutionEntity extends PvmExecutionImpl implements Execution, Proc
       ensureNotSuspended();
     }
 
-    Context.getCommandContext().performOperation(executionOperation, this);
+    Context.getCommandInvocationContext().performOperation(executionOperation, this);
   }
 
   protected void ensureNotSuspended() {
