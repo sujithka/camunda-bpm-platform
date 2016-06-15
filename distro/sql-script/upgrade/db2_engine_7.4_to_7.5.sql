@@ -209,7 +209,7 @@ alter table ACT_ID_TENANT_MEMBER
 create unique index ACT_UNIQ_TENANT_MEMB_USER on ACT_ID_TENANT_MEMBER(TENANT_ID_,UNI_USER_ID_);
 create unique index ACT_UNIQ_TENANT_MEMB_GROUP on ACT_ID_TENANT_MEMBER(TENANT_ID_,UNI_GROUP_ID_);
 
---- BATCH ---
+--  BATCH ---
 
 -- remove not null from job definition table --
 alter table ACT_RU_JOBDEF

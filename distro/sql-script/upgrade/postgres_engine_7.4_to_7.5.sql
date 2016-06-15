@@ -215,7 +215,7 @@ alter table ACT_ID_TENANT_MEMBER
     foreign key (GROUP_ID_)
     references ACT_ID_GROUP (ID_);      
 
---- BATCH ---
+--  BATCH ---
 
 -- remove not null from job definition table --
 alter table ACT_RU_JOBDEF
