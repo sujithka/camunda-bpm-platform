@@ -214,7 +214,7 @@ create unique index ACT_UNIQ_TENANT_MEMB_GROUP on ACT_ID_TENANT_MEMBER
    (case when GROUP_ID_ is null then null else TENANT_ID_ end,
     case when GROUP_ID_ is null then null else GROUP_ID_ end);
 
---  BATCH ---
+--- BATCH ---
 
 -- remove not null from job definition table --
 alter table ACT_RU_JOBDEF
