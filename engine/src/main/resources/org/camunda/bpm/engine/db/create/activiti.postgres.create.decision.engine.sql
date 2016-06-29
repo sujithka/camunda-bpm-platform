@@ -13,5 +13,4 @@ create table ACT_RE_DECISION_DEF (
     primary key (ID_)
 );
 
-create index ACT_IDX_DEC_DEF_TENANT_ID on ACT_RE_DECISION_DEF(TENANT_ID_);    
-    
+create index ACT_IDX_DEC_DEF_TENANT_ID on ACT_RE_DECISION_DEF(TENANT_ID_);
