@@ -39,6 +39,7 @@ import org.camunda.bpm.engine.rest.ProcessInstanceRestService;
 import org.camunda.bpm.engine.rest.TaskRestService;
 import org.camunda.bpm.engine.rest.TenantRestService;
 import org.camunda.bpm.engine.rest.UserRestService;
+import org.camunda.bpm.engine.rest.ValidateResourceRestService;
 import org.camunda.bpm.engine.rest.VariableInstanceRestService;
 import org.camunda.bpm.engine.rest.history.HistoryRestService;
 
@@ -170,6 +171,11 @@ public class DefaultProcessEngineRestServiceImpl extends AbstractProcessEngineRe
   @Path(TenantRestService.PATH)
   public TenantRestService getTenantRestService() {
     return super.getTenantRestService(null);
+  }
+
+  @Path(ValidateResourceRestService.PATH)
+  public ValidateResourceRestService getValidateResourceRestService() {
+    return super.getValidateResourceRestService(null);
   }
 
   @Override

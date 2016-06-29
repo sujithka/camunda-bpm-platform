@@ -598,5 +598,13 @@ public interface RepositoryService {
    */
   InputStream getDecisionDiagram(String decisionDefinitionId);
 
+  /**
+   * Validates a BPMN process resource.
+   *
+   * @param name of the resource
+   * @param resource input stream of the resource
+   */
+  void validateResource(String name, InputStream resource);
+
 }
 

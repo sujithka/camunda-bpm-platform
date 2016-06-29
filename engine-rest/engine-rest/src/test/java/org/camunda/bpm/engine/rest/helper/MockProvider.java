@@ -86,6 +86,7 @@ import org.camunda.bpm.engine.repository.DecisionDefinition;
 import org.camunda.bpm.engine.repository.Deployment;
 import org.camunda.bpm.engine.repository.ProcessDefinition;
 import org.camunda.bpm.engine.repository.Resource;
+import org.camunda.bpm.engine.rest.dto.repository.ValidationDto;
 import org.camunda.bpm.engine.rest.dto.task.TaskQueryDto;
 import org.camunda.bpm.engine.runtime.CaseExecution;
 import org.camunda.bpm.engine.runtime.CaseInstance;
@@ -776,6 +777,10 @@ public abstract class MockProvider {
   public static final int EXAMPLE_BATCH_REMAINING_JOBS = 21;
   public static final int EXAMPLE_BATCH_COMPLETED_JOBS = 22;
   public static final int EXAMPLE_BATCH_FAILED_JOBS = 23;
+
+  // validation
+  public static final String EXAMPLE_VALIDATION_EXCEPTION_MESSAGE = "ENGINE-09005 Could not parse BPMN process. Errors: ";
+  public static final String EXAMPLE_VALIDATION_EXCEPTION_TYPE = "org.camunda.bpm.engine.ProcessEngineException";
 
   // tasks
   public static Task createMockTask() {
@@ -2669,5 +2674,24 @@ public abstract class MockProvider {
     mockList.add(createMockBatchStatistics());
     return mockList;
   }
+
+  public static ValidationDto createMockValidation() {
+    ValidationDto mockValidation = mock(ValidationDto.class);
+    when(mockValidation.getDeploymentName()).thenReturn(EXAMPLE_DEPLOYMENT_ID);
+    when(mockValidation.getExceptionMessage()).thenReturn(null);
+    when(mockValidation.getExceptionType()).thenReturn(null);
+
+    return mockValidation;
+  }
+
+  public static ValidationDto createMockValidationWithException() {
+    ValidationDto mockValidation = mock(ValidationDto.class);
+    when(mockValidation.getDeploymentName()).thenReturn(EXAMPLE_DEPLOYMENT_ID);
+    when(mockValidation.getExceptionMessage()).thenReturn(EXAMPLE_VALIDATION_EXCEPTION_MESSAGE);
+    when(mockValidation.getExceptionType()).thenReturn(EXAMPLE_VALIDATION_EXCEPTION_TYPE);
+
+    return mockValidation;
+  }
+
 
 }
