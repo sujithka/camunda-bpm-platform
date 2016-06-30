@@ -7,6 +7,12 @@
     <version>7.5.3-SNAPSHOT</version>
   </parent>
 
+  <properties>
+    <camunda.version.old>
+      7.4.9-SNAPSHOT
+    </camunda.version.old>
+  </properties>
+
   <artifactId>camunda-qa-db-upgrade</artifactId>
   <packaging>jar</packaging>
   <name>camunda BPM - QA - upgrade - database</name>
@@ -250,8 +256,12 @@
                 <configuration>
                   <srcFiles>
                     <!-- now patch old version of the schema -->
-                    <srcFile>${project.build.directory}/scripts-current/sql/upgrade/${database.type}_engine_${camunda.old.majorVersion}.${camunda.old.minorVersion}_patch.sql</srcFile>
-                    <srcFile>${project.build.directory}/scripts-current/sql/upgrade/${database.type}_identity_${camunda.old.majorVersion}.${camunda.old.minorVersion}_patch.sql</srcFile>
+                    <!--
+                         OLD PATCHES are contained in the create script of the last minor version
+                         since we use the create script from 7.4.9
+                         <srcFile>${project.build.directory}/scripts-current/sql/upgrade/${database.type}_engine_${camunda.old.majorVersion}.${camunda.old.minorVersion}_patch.sql</srcFile>
+                         <srcFile>${project.build.directory}/scripts-current/sql/upgrade/${database.type}_identity_${camunda.old.majorVersion}.${camunda.old.minorVersion}_patch.sql</srcFile>
+                    -->
                   </srcFiles>
                 </configuration>
               </execution>
