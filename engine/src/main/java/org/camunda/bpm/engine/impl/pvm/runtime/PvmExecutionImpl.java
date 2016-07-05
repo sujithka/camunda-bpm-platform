@@ -252,6 +252,7 @@ public abstract class PvmExecutionImpl extends CoreExecution implements Activity
   @Override
   public void destroy() {
     LOG.destroying(this);
+    setScope(false);
   }
 
   protected void removeEventScopes() {
@@ -285,6 +286,7 @@ public abstract class PvmExecutionImpl extends CoreExecution implements Activity
     if(isActive && activity != null) {
       // set activity instance state to cancel
       setCanceled(true);
+      setTerminated(true);
       performOperation(PvmAtomicOperation.FIRE_ACTIVITY_END);
       // set activity instance state back to 'default'
       // -> execution will be reused for executing more activities and we want the state to
@@ -305,6 +307,18 @@ public abstract class PvmExecutionImpl extends CoreExecution implements Activity
     LOG.interruptingExecution(reason, skipCustomListeners);
     clearScope(reason, skipCustomListeners, skipIoMappings);
   }
+
+  protected boolean terminated = false;
+
+  public boolean isTerminated() {
+    return terminated;
+  }
+
+  public void setTerminated(boolean terminated) {
+    this.terminated = terminated;
+  }
+
+
 
   /**
    * Ends an execution. Invokes end listeners for the current activity and notifies the flow scope execution

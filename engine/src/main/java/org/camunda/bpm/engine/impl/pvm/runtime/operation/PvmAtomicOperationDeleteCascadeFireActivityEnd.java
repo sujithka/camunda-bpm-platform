@@ -30,6 +30,7 @@ public class PvmAtomicOperationDeleteCascadeFireActivityEnd extends PvmAtomicOpe
   @Override
   protected PvmExecutionImpl eventNotificationsStarted(PvmExecutionImpl execution) {
     execution.setCanceled(true);
+    execution.setTerminated(true);
     return super.eventNotificationsStarted(execution);
   }
 
