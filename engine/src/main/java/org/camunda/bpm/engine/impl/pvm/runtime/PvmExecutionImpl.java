@@ -310,6 +310,7 @@ public abstract class PvmExecutionImpl extends CoreExecution implements Activity
   @Override
   public void end(boolean completeScope) {
 
+
     setCompleteScope(completeScope);
 
     isActive = false;
@@ -1624,7 +1625,7 @@ public abstract class PvmExecutionImpl extends CoreExecution implements Activity
   }
 
   public void setCompleteScope(boolean completeScope) {
-    if (completeScope) {
+    if (completeScope && !isCanceled()) {
       activityInstanceState = ActivityInstanceState.SCOPE_COMPLETE.getStateCode();
     }
   }
