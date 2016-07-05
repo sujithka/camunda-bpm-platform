@@ -252,8 +252,6 @@ public abstract class PvmExecutionImpl extends CoreExecution implements Activity
   @Override
   public void destroy() {
     LOG.destroying(this);
-
-    setScope(false);
   }
 
   protected void removeEventScopes() {
