@@ -33,7 +33,6 @@ import org.camunda.bpm.model.bpmn.instance.EndEvent;
 import org.camunda.bpm.model.bpmn.instance.TerminateEventDefinition;
 import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
-import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
@@ -228,12 +227,7 @@ public class SelfCancellationTest {
     TerminateEventDefinition terminateDefinition = modelInstance.newInstance(TerminateEventDefinition.class);
     endEvent.addChildElement(terminateDefinition);
   }
-
-  @BeforeClass
-  public static void init() throws Exception {
-    org.h2.tools.Server.createWebServer("-web").start();
-  }
-
+  
   //========================================================================================================================
   //=======================================================TESTS============================================================
   //========================================================================================================================
