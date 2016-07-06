@@ -286,7 +286,6 @@ public abstract class PvmExecutionImpl extends CoreExecution implements Activity
     if(isActive && activity != null) {
       // set activity instance state to cancel
       setCanceled(true);
-      setTerminated(true);
       performOperation(PvmAtomicOperation.FIRE_ACTIVITY_END);
       // set activity instance state back to 'default'
       // -> execution will be reused for executing more activities and we want the state to
@@ -308,18 +307,6 @@ public abstract class PvmExecutionImpl extends CoreExecution implements Activity
     clearScope(reason, skipCustomListeners, skipIoMappings);
   }
 
-  protected boolean terminated = false;
-
-  public boolean isTerminated() {
-    return terminated;
-  }
-
-  public void setTerminated(boolean terminated) {
-    this.terminated = terminated;
-  }
-
-
-
   /**
    * Ends an execution. Invokes end listeners for the current activity and notifies the flow scope execution
    * of this happening which may result in the flow scope ending.
@@ -328,6 +315,7 @@ public abstract class PvmExecutionImpl extends CoreExecution implements Activity
    */
   @Override
   public void end(boolean completeScope) {
+
 
     setCompleteScope(completeScope);
 
@@ -1643,7 +1631,7 @@ public abstract class PvmExecutionImpl extends CoreExecution implements Activity
   }
 
   public void setCompleteScope(boolean completeScope) {
-    if (completeScope) {
+    if (completeScope && !isCanceled()) {
       activityInstanceState = ActivityInstanceState.SCOPE_COMPLETE.getStateCode();
     }
   }
