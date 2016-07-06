@@ -64,9 +64,7 @@ public class AtomicOperationInvocation {
     if (execution.isTerminated())
       if (
         (operation == PvmAtomicOperation.TRANSITION_NOTIFY_LISTENER_END
-         || operation == PvmAtomicOperation.ACTIVITY_NOTIFY_LISTENER_END
-         || operation == PvmAtomicOperation.ACTIVITY_END
-         || operation == PvmAtomicOperation.PROCESS_END)) {
+         || operation == PvmAtomicOperation.ACTIVITY_NOTIFY_LISTENER_END)) {
       return;
     }
 
