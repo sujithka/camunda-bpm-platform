@@ -57,25 +57,37 @@ public class ModuleDependencyProcessor implements DeploymentUnitProcessor {
 
     final DeploymentUnit deploymentUnit = phaseContext.getDeploymentUnit();
 
-    if(!ProcessApplicationAttachments.isProcessApplication(deploymentUnit)) {
-      return;
-    }
-
+    AttachmentList<DeploymentUnit> subdeployments = deploymentUnit.getAttachment(Attachments.SUB_DEPLOYMENTS);
     ModuleLoader moduleLoader = Module.getBootModuleLoader();
-    DeploymentUnit parent = deploymentUnit.getParent() == null ? deploymentUnit : deploymentUnit.getParent();
-
-    if(parent != deploymentUnit) {
-      // add dependency to all submodules
-      AttachmentList<DeploymentUnit> subdeployments = parent.getAttachment(Attachments.SUB_DEPLOYMENTS);
-      for (DeploymentUnit subdeploymentUnit : subdeployments) {
-        final ModuleSpecification moduleSpecification = subdeploymentUnit.getAttachment(Attachments.MODULE_SPECIFICATION);
-        addSystemDependencies(moduleLoader, moduleSpecification);
+    //if it contains sub deployments the deployment unit is an ear
+    if (subdeployments != null) {
+      boolean subDeploymentIsProcessApplication = false;
+      //check if sub deployments are process applications
+      for (DeploymentUnit subDeploymentUnit : subdeployments) {
+        if (ProcessApplicationAttachments.isProcessApplication(subDeploymentUnit)) {
+          subDeploymentIsProcessApplication = true;
+          break;
+        }
       }
+      //if one sub deployment is a process application add to all the dependency
+      if (subDeploymentIsProcessApplication) {
+        for (DeploymentUnit subDeploymentUnit : subdeployments) {
+          final ModuleSpecification moduleSpecification = subDeploymentUnit.getAttachment(Attachments.MODULE_SPECIFICATION);
+          addSystemDependencies(moduleLoader, moduleSpecification);
+        }
+      }
+    } else { //if the sub deployments are empty it is a war
 
+      //if the war has no parent the deployment unit is a simple war
+      if (deploymentUnit.getParent() == null) {
+        if (ProcessApplicationAttachments.isProcessApplication(deploymentUnit)) {
+          final ModuleSpecification moduleSpecification = deploymentUnit.getAttachment(Attachments.MODULE_SPECIFICATION);
+          addSystemDependencies(moduleLoader, moduleSpecification);
+        }
+      }
+      //if the war has a parent, then it is inside an ear so there is nothing to do
+      //since the dependency is added already
     }
-
-    final ModuleSpecification moduleSpecification = parent.getAttachment(Attachments.MODULE_SPECIFICATION);
-    addSystemDependencies(moduleLoader, moduleSpecification);
 
     // install the pa-module service
     ModuleIdentifier identifyer = deploymentUnit.getAttachment(Attachments.MODULE_IDENTIFIER);
