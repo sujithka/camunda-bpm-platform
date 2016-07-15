@@ -57,25 +57,41 @@ public class ModuleDependencyProcessor implements DeploymentUnitProcessor {
 
     final DeploymentUnit deploymentUnit = phaseContext.getDeploymentUnit();
 
-    if(!ProcessApplicationAttachments.isProcessApplication(deploymentUnit)) {
-      return;
-    }
 
-    ModuleLoader moduleLoader = Module.getBootModuleLoader();
-    DeploymentUnit parent = deploymentUnit.getParent() == null ? deploymentUnit : deploymentUnit.getParent();
-
-    if(parent != deploymentUnit) {
-      // add dependency to all submodules
-      AttachmentList<DeploymentUnit> subdeployments = parent.getAttachment(Attachments.SUB_DEPLOYMENTS);
-      for (DeploymentUnit subdeploymentUnit : subdeployments) {
-        final ModuleSpecification moduleSpecification = subdeploymentUnit.getAttachment(Attachments.MODULE_SPECIFICATION);
+    if (deploymentUnit.getParent() == null) {
+      //The deployment unit has no parent so it is a simple war or an ear.
+      //We have to add the dependency at first to this deployment unit.
+      ModuleLoader moduleLoader = Module.getBootModuleLoader();
+      if (ProcessApplicationAttachments.isProcessApplication(deploymentUnit)) {
+        final ModuleSpecification moduleSpecification = deploymentUnit.getAttachment(Attachments.MODULE_SPECIFICATION);
         addSystemDependencies(moduleLoader, moduleSpecification);
       }
 
+      AttachmentList<DeploymentUnit> subdeployments = deploymentUnit.getAttachment(Attachments.SUB_DEPLOYMENTS);
+      //Is the list of sub deployments empty the deployment unit is a war file.
+      //In cases of war files we have nothing todo, since the dependency was already added.
+      if (subdeployments != null) {
+        //The deployment unit contains sub deployments which means the deployment unit is an ear.
+        //We have to check whether sub deployments are process applications or not.
+        boolean subDeploymentIsProcessApplication = false;
+        for (DeploymentUnit subDeploymentUnit : subdeployments) {
+          if (ProcessApplicationAttachments.isProcessApplication(subDeploymentUnit)) {
+            subDeploymentIsProcessApplication = true;
+            break;
+          }
+        }
+        //if one sub deployment is a process application add to all the dependency
+        //also we have to add the dependency to the current deployment unit which is an ear
+        if (subDeploymentIsProcessApplication) {
+          for (DeploymentUnit subDeploymentUnit : subdeployments) {
+            final ModuleSpecification moduleSpecification = subDeploymentUnit.getAttachment(Attachments.MODULE_SPECIFICATION);
+            addSystemDependencies(moduleLoader, moduleSpecification);
+          }
+          final ModuleSpecification moduleSpecification = deploymentUnit.getAttachment(Attachments.MODULE_SPECIFICATION);
+          addSystemDependencies(moduleLoader, moduleSpecification);
+        }
+      }
     }
-
-    final ModuleSpecification moduleSpecification = parent.getAttachment(Attachments.MODULE_SPECIFICATION);
-    addSystemDependencies(moduleLoader, moduleSpecification);
 
     // install the pa-module service
     ModuleIdentifier identifyer = deploymentUnit.getAttachment(Attachments.MODULE_IDENTIFIER);
