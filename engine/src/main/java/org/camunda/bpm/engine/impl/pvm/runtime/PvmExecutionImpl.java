@@ -1530,6 +1530,23 @@ public abstract class PvmExecutionImpl extends CoreExecution implements Activity
     return getParent();
   }
 
+  /**
+   * Method to store variable in a specific scope identified by activity ID.
+   *
+   * @param variableName - name of the variable
+   * @param value - value of the variable
+   * @param activityId - activity ID which is associated with destination execution, if not existing - nothing happens
+   */
+  public void setVariable (String variableName, Object value, String activityId) {
+    Map<ScopeImpl, PvmExecutionImpl> mapping = this.createActivityExecutionMapping();
+    for (ScopeImpl scope : mapping.keySet()) {
+      if (scope.getId().equals(activityId)) {
+        mapping.get(scope).setVariableLocal(variableName,value);
+      }
+    }
+  }
+
+
   // sequence counter ///////////////////////////////////////////////////////////
 
   public long getSequenceCounter() {
