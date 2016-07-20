@@ -11,6 +11,18 @@
   <packaging>jar</packaging>
   <name>camunda BPM - QA - test old engine</name>
 
+  <dependencyManagement>
+    <dependencies>
+    <dependency>
+        <groupId>org.camunda.bpm.dmn</groupId>
+        <artifactId>camunda-engine-dmn-bom</artifactId>
+        <version>7.5.0</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <dependencies>
     <dependency>
       <groupId>org.camunda.bpm</groupId>
