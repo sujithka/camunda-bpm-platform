@@ -11,6 +11,18 @@
   <packaging>jar</packaging>
   <name>camunda BPM - QA - previous engine</name>
 
+  <dependencyManagement>
+    <dependencies>
+    <dependency>
+        <groupId>org.camunda.bpm.dmn</groupId>
+        <artifactId>camunda-engine-dmn-bom</artifactId>
+        <version>7.5.0</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <dependencies>
     <!-- NOTE: this pulls transitive dependencies of version ${project.version} in unless
       you declare them to be ${camunda.version.current} here -->

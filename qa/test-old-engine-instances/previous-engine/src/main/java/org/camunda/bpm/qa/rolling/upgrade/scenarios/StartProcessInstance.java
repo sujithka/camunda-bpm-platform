@@ -29,7 +29,7 @@ public class StartProcessInstance {
 
   @Deployment
   public static String deploy() {
-    return "org/camunda/bpm/qa/upgrade/deployment/process.bpmn20.xml";
+    return "org/camunda/bpm/qa/rolling/upgrade/deployment/process.bpmn20.xml";
   }
 
   @DescribesScenario("init")
