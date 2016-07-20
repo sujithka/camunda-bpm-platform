@@ -3,7 +3,7 @@ package org.camunda.bpm.engine.history;
 /**
  * @author Stefan Hentschel.
  */
-public interface TaskReportResult {
+public interface HistoricTaskInstanceReportResult {
 
   /**
    * <p>Returns the selected definition key.</p>
@@ -12,7 +12,7 @@ public interface TaskReportResult {
    *         When the query is triggered with a 'groupByProcessDefinitionKey' then the returned value will be a
    *         process definition key. Else the return value is a task defintion key
    */
-  String getDefinition();
+  String getDefinitionKey();
 
   /**
    * <p>Returns the count of the grouped items.</p>
