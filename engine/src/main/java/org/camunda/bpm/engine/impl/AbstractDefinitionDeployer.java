@@ -245,12 +245,14 @@ public abstract class AbstractDefinitionDeployer<DefinitionEntity extends Resour
       String definitionKey = definition.getKey();
 
       DefinitionEntity persistedDefinition = findDefinitionByDeploymentAndKey(deploymentId, definitionKey);
+      //definition can be deleted from the database
+      if (persistedDefinition != null) {
+        persistedDefinitionLoaded(deployment, definition, persistedDefinition);
 
-      persistedDefinitionLoaded(deployment, definition, persistedDefinition);
+        updateDefinitionByPersistedDefinition(deployment, definition, persistedDefinition);
 
-      updateDefinitionByPersistedDefinition(deployment, definition, persistedDefinition);
-
-      registerDefinition(deployment, definition, properties);
+        registerDefinition(deployment, definition, properties);
+      }
     }
   }
 
