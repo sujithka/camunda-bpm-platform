@@ -117,6 +117,19 @@ public interface RepositoryService {
    */
   void deleteDeployment(String deploymentId, boolean cascade, boolean skipCustomListeners);
 
+
+  /**
+   * Deletes the process definition which belongs to the given process definition id.
+   *
+   * @param processDefinitionId the id, which corresponds to the process definition
+   * @throws ProcessEngineException
+   *          If the process definition does not exist
+   *
+   * @throws AuthorizationException
+   *          If the user has no {@link Permissions#DELETE} permission on {@link Resources#PROCESS_DEFINITION}.
+   */
+  void deleteProcessDefinition(String processDefinitionId);
+
   /**
    * Retrieves a list of deployment resource names for the given deployment,
    * ordered alphabetically.
