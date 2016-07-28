@@ -13,6 +13,7 @@
 
 package org.camunda.bpm.engine.impl.persistence.entity;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,10 +23,15 @@ import org.camunda.bpm.engine.impl.Page;
 import org.camunda.bpm.engine.impl.ProcessDefinitionQueryImpl;
 import org.camunda.bpm.engine.impl.ProcessEngineLogger;
 import org.camunda.bpm.engine.impl.cfg.auth.ResourceAuthorizationProvider;
+import org.camunda.bpm.engine.impl.context.Context;
 import org.camunda.bpm.engine.impl.db.EnginePersistenceLogger;
 import org.camunda.bpm.engine.impl.db.ListQueryParameterObject;
+import org.camunda.bpm.engine.impl.event.MessageEventHandler;
+import org.camunda.bpm.engine.impl.event.SignalEventHandler;
+import org.camunda.bpm.engine.impl.jobexecutor.TimerStartEventJobHandler;
 import org.camunda.bpm.engine.impl.persistence.AbstractManager;
 import org.camunda.bpm.engine.repository.ProcessDefinition;
+import org.camunda.bpm.engine.runtime.Job;
 
 
 /**
@@ -182,6 +188,94 @@ public class ProcessDefinitionManager extends AbstractManager {
   public void deleteProcessDefinitionsByDeploymentId(String deploymentId) {
     getDbEntityManager().delete(ProcessDefinitionEntity.class, "deleteProcessDefinitionsByDeploymentId", deploymentId);
   }
+
+  public void deleteProcessDefinitionById(String processDefinitionId, boolean cascade, boolean skipCustomListeners) {
+    ProcessDefinition processDefinition = getProcessDefinitionManager().findLatestProcessDefinitionById(processDefinitionId);
+    deleteProcessDefinition(processDefinition, processDefinitionId, cascade, skipCustomListeners);
+  }
+
+  protected void cascadeDeleteProcessDefinition(String processDefinitionId, boolean skipCustomListeners) {
+    getProcessInstanceManager()
+      .deleteProcessInstancesByProcessDefinition(processDefinitionId, "deleted process definition", true, skipCustomListeners);
+
+     // remove historic incidents which are not referenced to a process instance
+    getHistoricIncidentManager().deleteHistoricIncidentsByProcessDefinitionId(processDefinitionId);
+
+     // remove historic identity links which are not reference to a process instance
+    getHistoricIdentityLinkManager().deleteHistoricIdentityLinksLogByProcessDefinitionId(processDefinitionId);
+
+     // remove historic job log entries not related to a process instance
+    getHistoricJobLogManager().deleteHistoricJobLogsByProcessDefinitionId(processDefinitionId);
+  }
+
+  protected void deleteTimerStartEventsForProcessDefinition(ProcessDefinition processDefinition) {
+    List<JobEntity> timerStartJobs = getJobManager().findJobsByConfiguration(TimerStartEventJobHandler.TYPE, processDefinition.getKey(), processDefinition.getTenantId());
+
+    ProcessDefinitionEntity latestVersion = getProcessDefinitionManager()
+        .findLatestProcessDefinitionByKeyAndTenantId(processDefinition.getKey(), processDefinition.getTenantId());
+
+    // delete timer start event jobs only if this is the latest version of the process definition.
+    if(latestVersion != null && latestVersion.getId().equals(processDefinition.getId())) {
+      for (Job job : timerStartJobs) {
+        ((JobEntity)job).delete();
+      }
+    }
+  }
+
+  public void deleteSubscriptionsForProcessDefinition(String processDefinitionId) {
+    List<EventSubscriptionEntity> eventSubscriptionsToRemove = new ArrayList<EventSubscriptionEntity>();
+    // remove message event subscriptions:
+    List<EventSubscriptionEntity> messageEventSubscriptions = getEventSubscriptionManager()
+      .findEventSubscriptionsByConfiguration(MessageEventHandler.EVENT_HANDLER_TYPE, processDefinitionId);
+    eventSubscriptionsToRemove.addAll(messageEventSubscriptions);
+
+    // remove signal event subscriptions:
+    List<EventSubscriptionEntity> signalEventSubscriptions = getEventSubscriptionManager().findEventSubscriptionsByConfiguration(SignalEventHandler.EVENT_HANDLER_TYPE , processDefinitionId);
+    eventSubscriptionsToRemove.addAll(signalEventSubscriptions);
+
+    for (EventSubscriptionEntity eventSubscriptionEntity : eventSubscriptionsToRemove) {
+      eventSubscriptionEntity.delete();
+    }
+  }
+
+  /**
+   * Deletes the given process definition from the database and cache.
+   * If cascade is set to true it deletes also the process instances and history.
+   *
+   * @param processDefinition
+   * @param processDefinitionId
+   * @param cascade
+   * @param skipCustomListeners
+   */
+  public void deleteProcessDefinition(ProcessDefinition processDefinition, String processDefinitionId, boolean cascade, boolean skipCustomListeners) {
+
+    if (cascade) {
+      cascadeDeleteProcessDefinition(processDefinitionId, skipCustomListeners);
+    }
+
+    // remove related authorization parameters in IdentityLink table
+    getIdentityLinkManager().deleteIdentityLinksByProcDef(processDefinitionId);
+
+    // remove timer start events:
+    deleteTimerStartEventsForProcessDefinition(processDefinition);
+
+    //delete process definition from database
+    getDbEntityManager().delete(ProcessDefinitionEntity.class, "deleteProcessDefinitionsById", processDefinitionId);
+
+
+    // remove process definitions from cache:
+    Context
+      .getProcessEngineConfiguration()
+      .getDeploymentCache()
+      .removeProcessDefinition(processDefinitionId);
+
+    deleteSubscriptionsForProcessDefinition(processDefinitionId);
+
+    // delete job definitions
+    getJobDefinitionManager().deleteJobDefinitionsByProcessDefinitionId(processDefinition.getId());
+
+  }
+
 
   // helper ///////////////////////////////////////////////////////////
 

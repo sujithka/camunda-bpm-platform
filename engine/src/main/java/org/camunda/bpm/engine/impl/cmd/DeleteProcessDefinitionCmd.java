@@ -17,11 +17,10 @@ package org.camunda.bpm.engine.impl.cmd;
 
 import java.io.Serializable;
 import org.camunda.bpm.engine.impl.cfg.CommandChecker;
-import org.camunda.bpm.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.camunda.bpm.engine.impl.interceptor.Command;
 import org.camunda.bpm.engine.impl.interceptor.CommandContext;
-import org.camunda.bpm.engine.impl.persistence.entity.ProcessDefinitionEntity;
 import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotNull;
+import org.camunda.bpm.engine.repository.ProcessDefinition;
 
 /**
  * Command to delete a process definition form a deployment.
@@ -31,16 +30,20 @@ import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotNull;
 public class DeleteProcessDefinitionCmd implements Command<Void>, Serializable {
 
   private final String processDefinitionId;
+  private final Boolean cascade;
+  private final Boolean skipCustomListeners;
 
-  public DeleteProcessDefinitionCmd(String toDeletedProcDef) {
-    this.processDefinitionId = toDeletedProcDef;
+  public DeleteProcessDefinitionCmd(String processDefinitionId, Boolean cascade, Boolean skipCustomListeners) {
+    this.processDefinitionId = processDefinitionId;
+    this.cascade = cascade;
+    this.skipCustomListeners = skipCustomListeners;
   }
 
   @Override
   public Void execute(CommandContext commandContext) {
     ensureNotNull("processDefinitionId", processDefinitionId);
 
-    ProcessDefinitionEntity processDefinition = commandContext.getProcessDefinitionManager()
+    ProcessDefinition processDefinition = commandContext.getProcessDefinitionManager()
                                                 .findLatestProcessDefinitionById(processDefinitionId);
     ensureNotNull("No process definition found with id '" + processDefinitionId + "'", "processDefinition", processDefinition);
 
@@ -48,11 +51,7 @@ public class DeleteProcessDefinitionCmd implements Command<Void>, Serializable {
       checker.checkDeleteProcessDefinitionById(processDefinitionId);
     }
 
-    ProcessEngineConfigurationImpl processEngineConfiguration = commandContext.getProcessEngineConfiguration();
-    //at first delete proc def from cache
-    processEngineConfiguration.getDeploymentCache().removeProcessDefinition(processDefinitionId);
-    //at second delete proc def from db
-    commandContext.getDbEntityManager().delete(ProcessDefinitionEntity.class, "deleteProcessDefinitionsById", processDefinitionId);
+    commandContext.getProcessDefinitionManager().deleteProcessDefinition(processDefinition, processDefinitionId, cascade, skipCustomListeners);
     return null;
   }
 }

@@ -117,7 +117,17 @@ public class RepositoryServiceImpl extends ServiceImpl implements RepositoryServ
 
   @Override
   public void deleteProcessDefinition(String processDefinitionId) {
-    commandExecutor.execute(new DeleteProcessDefinitionCmd(processDefinitionId));
+    deleteProcessDefinition(processDefinitionId, false);
+  }
+
+  @Override
+  public void deleteProcessDefinition(String processDefinitionId, boolean cascade) {
+    deleteProcessDefinition(processDefinitionId, cascade, false);
+  }
+
+  @Override
+  public void deleteProcessDefinition(String processDefinitionId, boolean cascade, boolean skipCustomListeners) {
+    commandExecutor.execute(new DeleteProcessDefinitionCmd(processDefinitionId, cascade, skipCustomListeners));
   }
 
   public ProcessDefinitionQuery createProcessDefinitionQuery() {
