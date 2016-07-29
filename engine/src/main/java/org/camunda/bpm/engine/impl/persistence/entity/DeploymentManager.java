@@ -58,16 +58,46 @@ public class DeploymentManager extends AbstractManager {
 
   public void deleteDeployment(String deploymentId, boolean cascade, boolean skipCustomListeners) {
     List<ProcessDefinition> processDefinitions = getProcessDefinitionManager().findProcessDefinitionsByDeploymentId(deploymentId);
-
-    for (ProcessDefinition processDefinition : processDefinitions) {
-      getProcessDefinitionManager()
-              .deleteProcessDefinition(processDefinition,
-                      processDefinition.getId(), cascade, skipCustomListeners);
-    }
-
     if (cascade) {
+      // *NOTE*:
+      // The process instances of ALL process definitions must be
+      // deleted, before every process definition can be deleted!
+      //
+      // On deletion of all process instances, the task listeners will
+      // be deleted as well. Deletion of tasks and listeners needs
+      // the redeployment of deployments, which can cause to problems if
+      // is done sequential with deletion of process definition.
+      //
+      // For example:
+      // Deployment contains two process definiton. First process definition
+      // and instances will be removed, also cleared from the cache.
+      // Second process definition will be removed and his instances.
+      // Deletion of instances will cause redeployment this deploys again
+      // first into the cache. Only the second will be removed from cache and
+      // first remains in the cache after the deletion process.
+      //
+      // Thats why we have to clear up all instances at first, after that
+      // we can cleanly remove the process definitions.
+      for (ProcessDefinition processDefinition: processDefinitions) {
+        String processDefinitionId = processDefinition.getId();
+        getProcessInstanceManager()
+          .deleteProcessInstancesByProcessDefinition(processDefinitionId, "deleted deployment", true, skipCustomListeners);
+      }
       // delete historic job logs (for example for timer start event jobs)
       getHistoricJobLogManager().deleteHistoricJobLogsByDeploymentId(deploymentId);
+    }
+
+
+    for (ProcessDefinition processDefinition : processDefinitions) {
+      String processDefinitionId = processDefinition.getId();
+      // Process definition cascade true deletes the history and
+      // process instances if instances flag is set as well to true.
+      // Problem as described above, redeployes the deployment.
+      // Represents no problem if only one process definition is deleted
+      // in a transaction! We have to set the instances flag to false.
+      getProcessDefinitionManager()
+        .deleteProcessDefinition(processDefinition, processDefinitionId,
+                cascade, false, skipCustomListeners);
     }
 
     deleteCaseDeployment(deploymentId, cascade);

@@ -51,7 +51,7 @@ public class DeleteProcessDefinitionCmd implements Command<Void>, Serializable {
       checker.checkDeleteProcessDefinitionById(processDefinitionId);
     }
 
-    commandContext.getProcessDefinitionManager().deleteProcessDefinition(processDefinition, processDefinitionId, cascade, skipCustomListeners);
+    commandContext.getProcessDefinitionManager().deleteProcessDefinition(processDefinition, processDefinitionId, cascade, cascade, skipCustomListeners);
     return null;
   }
 }
