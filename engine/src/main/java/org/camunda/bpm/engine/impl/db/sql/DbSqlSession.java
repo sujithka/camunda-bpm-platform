@@ -32,7 +32,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.TransactionIsolationLevel;
 import org.camunda.bpm.engine.ProcessEngine;
+import org.camunda.bpm.engine.ProcessEngineException;
 import org.camunda.bpm.engine.impl.ProcessEngineLogger;
 import org.camunda.bpm.engine.impl.context.Context;
 import org.camunda.bpm.engine.impl.db.AbstractPersistenceSession;
@@ -68,11 +70,17 @@ public class DbSqlSession extends AbstractPersistenceSession {
     this.dbSqlSessionFactory = dbSqlSessionFactory;
     this.sqlSession = dbSqlSessionFactory
       .getSqlSessionFactory()
-      .openSession();
+      .openSession(TransactionIsolationLevel.READ_COMMITTED);
   }
 
   public DbSqlSession(DbSqlSessionFactory dbSqlSessionFactory, Connection connection, String catalog, String schema) {
     this.dbSqlSessionFactory = dbSqlSessionFactory;
+    try {
+      connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+    } catch (SQLException e) {
+      throw new ProcessEngineException("Unable to set transation isolation level on connection", e);
+    }
+
     this.sqlSession = dbSqlSessionFactory
       .getSqlSessionFactory()
       .openSession(connection);
