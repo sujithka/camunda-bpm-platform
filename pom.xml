@@ -11,7 +11,7 @@
 
   <groupId>org.camunda.bpm</groupId>
   <artifactId>camunda-root</artifactId>
-  <version>7.5.3</version>
+  <version>7.5.3-ee</version>
   <packaging>pom</packaging>
   <name>camunda BPM - Root Pom</name>
 
