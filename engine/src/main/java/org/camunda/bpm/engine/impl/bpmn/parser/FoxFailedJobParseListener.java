@@ -61,11 +61,7 @@ public class FoxFailedJobParseListener extends AbstractBpmnParseListener {
   public void parseIntermediateThrowEvent(Element intermediateEventElement, ScopeImpl scope, ActivityImpl activity) {
     String type = activity.getProperties().get(BpmnProperties.TYPE);
     if (type != null && type.equals(INTERMEDIATE_SIGNAL_THROW)) {
-      Element signalDefElement = intermediateEventElement.element(SIGNAL_EVENT_DEFINITION);
-      boolean asynch = "true".equals(signalDefElement.attributeNS(BpmnParse.CAMUNDA_BPMN_EXTENSIONS_NS, "async", "false"));
-      if (asynch) {
-        this.setFailedJobRetryTimeCycleValue(intermediateEventElement, activity);
-      }
+      this.setFailedJobRetryTimeCycleValue(intermediateEventElement, activity);
     }
   }
 
