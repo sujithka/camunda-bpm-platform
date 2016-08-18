@@ -36,7 +36,7 @@
   <delete id="deleteAllMeterLogEntries">
     delete from ${prefix}ACT_RU_METER_LOG
   </delete>
-  
+
   <delete id="deleteMeterLogEntriesByTimestampAndReporter" parameterType="java.util.Map">
     delete from ${prefix}ACT_RU_METER_LOG
     <where>
@@ -46,10 +46,10 @@
       <if test="timestamp != null">
         and TIMESTAMP_ &lt;= #{timestamp, jdbcType=TIMESTAMP}
       </if>
-        
+
     </where>
   </delete>
-  
+
 
   <!-- Meter RESULTMAP -->
 
@@ -60,6 +60,8 @@
     <result property="value" column="VALUE_" jdbcType="BIGINT" />
     <result property="timestamp" column="TIMESTAMP_" jdbcType="TIMESTAMP" />
   </resultMap>
+
+
 
   <!-- SELECT -->
 
@@ -85,5 +87,30 @@
       </if>
     </where>
   </sql>
+
+
+  <resultMap id="meterResultIntervallMap" type="org.camunda.bpm.engine.impl.persistence.entity.MeterLogEntity">
+    <result property="name" column="NAME_" jdbcType="VARCHAR" />
+    <result property="reporter" column="REPORTER_" jdbcType="VARCHAR" />
+    <result property="value" column="VALUE_" jdbcType="BIGINT" />
+    <result property="timestamp" column="TIMESTAMP_" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <select id="selectMeterLogAggregatedByTimeInterval"  parameterType="org.camunda.bpm.engine.impl.metrics.MetricsQueryImpl" resultMap="meterResultIntervallMap">
+    ${limitBefore}
+    SELECT
+      NAME_,
+      REPORTER_,
+      SUM(VALUE_) as VALUE_,
+      DATEADD('s', FLOOR(DATEDIFF('s', '1970-01-01', TIMESTAMP_) / #{interval} ) * #{interval}, DATE '1970-01-01') as TIMESTAMP_
+    ${limitBetween}
+    <include refid="selectMeterLogsByQueryCriteriaSql"/>
+    GROUP BY
+      NAME_,
+      REPORTER_,
+      TIMESTAMP_
+    ORDER BY TIMESTAMP_ DESC
+    ${limitAfter}
+  </select>
 
 </mapper>

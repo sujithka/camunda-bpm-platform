@@ -14,6 +14,7 @@ package org.camunda.bpm.engine.impl.persistence.entity;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.camunda.bpm.engine.impl.context.Context;
@@ -21,6 +22,7 @@ import org.camunda.bpm.engine.impl.metrics.Meter;
 import org.camunda.bpm.engine.impl.metrics.MetricsQueryImpl;
 import org.camunda.bpm.engine.impl.persistence.AbstractManager;
 import org.camunda.bpm.engine.impl.util.ClockUtil;
+import org.camunda.bpm.engine.management.Metric;
 
 /**
  * @author Daniel Meyer
@@ -48,6 +50,10 @@ public class MeterLogManager extends AbstractManager {
     }
 
     return result;
+  }
+
+  public List<Metric> executeSelectInterval(MetricsQueryImpl query) {
+    return getDbEntityManager().selectList("selectMeterLogAggregatedByTimeInterval", query);
   }
 
   protected boolean shouldAddCurrentUnloggedCount(MetricsQueryImpl query) {

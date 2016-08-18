@@ -12,22 +12,26 @@
  */
 package org.camunda.bpm.engine.impl.metrics;
 
-import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotNull;
-
 import java.io.Serializable;
 import java.util.Date;
-
+import java.util.List;
 import org.camunda.bpm.engine.ProcessEngineException;
+import org.camunda.bpm.engine.impl.db.ListQueryParameterObject;
 import org.camunda.bpm.engine.impl.interceptor.Command;
 import org.camunda.bpm.engine.impl.interceptor.CommandContext;
 import org.camunda.bpm.engine.impl.interceptor.CommandExecutor;
+import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotNull;
+import org.camunda.bpm.engine.management.Metric;
 import org.camunda.bpm.engine.management.MetricsQuery;
 
 /**
  * @author Daniel Meyer
  *
  */
-public class MetricsQueryImpl implements Serializable, Command<Object>, MetricsQuery {
+public class MetricsQueryImpl extends ListQueryParameterObject implements Serializable, Command<Object>, MetricsQuery {
+
+  public static final int DEFAULT_LIMIT_SELECT_INTERVAL = 200;
+  public static final long DEFAULT_SELECT_INTERVAL = 15 * 60;
 
   private static final long serialVersionUID = 1L;
 
@@ -35,7 +39,7 @@ public class MetricsQueryImpl implements Serializable, Command<Object>, MetricsQ
   protected String reporter;
   protected Date startDate;
   protected Date endDate;
-  protected MetricsQueryType queryType;
+  protected Long interval;
 
   protected transient CommandExecutor commandExecutor;
 
@@ -67,19 +71,68 @@ public class MetricsQueryImpl implements Serializable, Command<Object>, MetricsQ
     return this;
   }
 
+  /**
+   * Contains the command implementation which should be executed either
+   * metric sum or select metric grouped by time interval.
+   *
+   * Note: this enables to quit with the enum distinction
+   */
+  protected Command<Object> callback;
+
+  @Override
+  public List<Metric> interval() {
+    callback = new Command() {
+      @Override
+      public Object execute(CommandContext commandContext) {
+        return commandContext.getMeterLogManager()
+          .executeSelectInterval(MetricsQueryImpl.this);
+      }
+    };
+
+    return (List<Metric>) commandExecutor.execute(this);
+  }
+
   public long sum() {
-    queryType = MetricsQueryType.SUM;
+    callback = new Command() {
+      @Override
+      public Object execute(CommandContext commandContext) {
+        return commandContext.getMeterLogManager()
+          .executeSelectSum(MetricsQueryImpl.this);
+      }
+    };
+
     return (Long) commandExecutor.execute(this);
   }
 
+  @Override
   public Object execute(CommandContext commandContext) {
-    switch (queryType) {
-    case SUM:
-      return commandContext.getMeterLogManager()
-          .executeSelectSum(this);
+    if (callback != null) {
+      return callback.execute(commandContext);
     }
-    throw new ProcessEngineException("Incorrect query type. Must be one of "+MetricsQueryType.values());
+    throw new ProcessEngineException("Query can't be executed. Use either sum or interval to query the metrics.");
   }
+
+  @Override
+  public MetricsQuery offset(int offset) {
+    setFirstResult(offset);
+    return this;
+  }
+
+  @Override
+  public MetricsQuery limit(int maxResults) {
+    setMaxResults(maxResults);
+    return this;
+  }
+
+  @Override
+  public void setMaxResults(int maxResults) {
+    if (maxResults > DEFAULT_LIMIT_SELECT_INTERVAL) {
+      throw new ProcessEngineException("Metrics interval query row limit can't be set larger than 200.");
+    }
+    this.maxResults = maxResults;
+  }
+
+
 
   public Date getStartDate() {
     return startDate;
@@ -95,6 +148,21 @@ public class MetricsQueryImpl implements Serializable, Command<Object>, MetricsQ
 
   public String getReporter() {
     return reporter;
+  }
+
+  public Long getInterval() {
+    if (interval == null) {
+      return DEFAULT_SELECT_INTERVAL;
+    }
+    return interval;
+  }
+
+  @Override
+  public int getMaxResults() {
+    if (maxResults > DEFAULT_LIMIT_SELECT_INTERVAL) {
+      return DEFAULT_LIMIT_SELECT_INTERVAL;
+    }
+    return super.getMaxResults();
   }
 
 }
