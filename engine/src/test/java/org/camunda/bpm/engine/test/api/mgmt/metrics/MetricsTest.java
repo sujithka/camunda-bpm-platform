@@ -13,16 +13,13 @@
 package org.camunda.bpm.engine.test.api.mgmt.metrics;
 
 import java.util.Date;
-import java.util.List;
 import static junit.framework.TestCase.assertEquals;
 import org.camunda.bpm.engine.ManagementService;
 
 import org.camunda.bpm.engine.ProcessEngineException;
 import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.impl.cfg.ProcessEngineConfigurationImpl;
-import org.camunda.bpm.engine.impl.metrics.MetricsQueryImpl;
 import org.camunda.bpm.engine.impl.util.ClockUtil;
-import org.camunda.bpm.engine.management.Metric;
 import org.camunda.bpm.engine.management.Metrics;
 import org.camunda.bpm.engine.test.ProcessEngineRule;
 import org.camunda.bpm.engine.test.util.ProcessEngineTestRule;
@@ -346,48 +343,4 @@ public class MetricsTest {
     processEngineConfiguration.getDbMetricsReporter().setReporterId(null);
   }
 
-  protected void generateMeterData(long dataCount, long intervall, long dataPerIntervall) {
-    testRule.deploy(Bpmn.createExecutableProcess("testProcess")
-            .startEvent()
-            .manualTask()
-            .endEvent()
-            .done());
-    long startDate = 0;
-    for (int i = 0; i < dataCount; i++) {
-      long diff = intervall / dataPerIntervall;
-      for (int j = 0; j < dataPerIntervall; j++) {
-        startDate += diff;
-        ClockUtil.setCurrentTime(new Date(startDate));
-        runtimeService.startProcessInstanceByKey("testProcess");
-        processEngineConfiguration.getDbMetricsReporter().reportNow();
-      }
-    }
-  }
-
-  @Test
-  public void testMeterQueryLimit() {
-    //given metric data
-    generateMeterData(250, 15 * 60 * 1000, 10);
-
-    //when query metric interval data with default values
-    List<Metric> metrics = managementService.createMetricsQuery().interval();
-
-    //then max 200 values are returned
-    assertEquals(MetricsQueryImpl.DEFAULT_LIMIT_SELECT_INTERVAL, metrics.size());
-  }
-
-  @Test
-  public void testMeterQueryIncreaseLimit() {
-    //given metric data
-    generateMeterData(250, 15 * 60 * 1000, 10);
-
-    //when query metric interval data with max results set to 1000
-    exception.expect(ProcessEngineException.class);
-    exception.expectMessage("Metrics interval query row limit can't be set larger than 200.");
-    List<Metric> metrics = managementService.createMetricsQuery().limit(1000).interval();
-
-    //then max 200 values are returned
-    assertEquals(MetricsQueryImpl.DEFAULT_LIMIT_SELECT_INTERVAL, metrics.size());
-
-  }
 }
