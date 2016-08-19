@@ -89,11 +89,13 @@
   </sql>
 
 
-  <resultMap id="meterResultIntervallMap" type="org.camunda.bpm.engine.impl.persistence.entity.MeterLogEntity">
-    <result property="name" column="NAME_" jdbcType="VARCHAR" />
-    <result property="reporter" column="REPORTER_" jdbcType="VARCHAR" />
+  <resultMap id="meterResultIntervallMap" type="org.camunda.bpm.engine.impl.persistence.entity.MetricIntervalEntity">
+    <constructor>
+      <idArg column="TIMESTAMP_" jdbcType="TIMESTAMP"/>
+      <idArg column="NAME_" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <idArg column="REPORTER_" javaType="java.lang.String" jdbcType="VARCHAR"/>
+   </constructor>
     <result property="value" column="VALUE_" jdbcType="BIGINT" />
-    <result property="timestamp" column="TIMESTAMP_" jdbcType="TIMESTAMP" />
   </resultMap>
 
   <select id="selectMeterLogAggregatedByTimeInterval"  parameterType="org.camunda.bpm.engine.impl.metrics.MetricsQueryImpl" resultMap="meterResultIntervallMap">
