@@ -71,6 +71,21 @@ public interface MetricsQuery {
    */
   List<Metric> interval();
 
+
+
+  /**
+   * Returns the metrics summed up and aggregated on a time interval.
+   * The size of the interval is given via parameter.
+   * The time unit is seconds! The list size has a maximum of 200
+   * the maximum can be decreased with the MetricsQuery#limit method. Paging
+   * is enabled with the help of the offset.
+   *
+   * @param interval The time interval on which the metrics should be aggregated.
+   *                  The time unit is seconds.
+   * @return the aggregated metrics
+   */
+  List<Metric> interval(long interval);
+
   /**
    * @return the aggregated sum
    */

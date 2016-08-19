@@ -92,6 +92,12 @@ public class MetricsQueryImpl extends ListQueryParameterObject implements Serial
     return (List<Metric>) commandExecutor.execute(this);
   }
 
+  @Override
+  public List<Metric> interval(long interval) {
+    this.interval = interval;
+    return interval();
+  }
+
   public long sum() {
     callback = new Command() {
       @Override
@@ -131,8 +137,6 @@ public class MetricsQueryImpl extends ListQueryParameterObject implements Serial
     }
     this.maxResults = maxResults;
   }
-
-
 
   public Date getStartDate() {
     return startDate;
