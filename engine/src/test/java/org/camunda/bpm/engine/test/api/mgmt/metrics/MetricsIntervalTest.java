@@ -184,7 +184,7 @@ public class MetricsIntervalTest {
     //given metric data
 
     //when query metric interval data with custom time interval
-    List<Metric> metrics = managementService.createMetricsQuery().interval(300);
+    List<Metric> metrics = managementService.createMetricsQuery().interval(300 * 1000);
 
     //then custom interval is 300 s (5 minutes)
     int interval = 5 * 60 * 1000;
@@ -242,7 +242,7 @@ public class MetricsIntervalTest {
     //given metric data
 
     //when query metric interval data with custom interval and reporter in where clause
-    List<Metric> metrics = managementService.createMetricsQuery().reporter("127.0.0.1$default").interval(300);
+    List<Metric> metrics = managementService.createMetricsQuery().reporter("127.0.0.1$default").interval(300 * 1000);
 
     //then result contains only metrics from given reporter, since it is the default it contains all
     assertEquals(200, metrics.size());
@@ -265,7 +265,7 @@ public class MetricsIntervalTest {
     //given metric data
 
     //when query metric interval data with custom interval and non existing reporter in where clause
-    List<Metric> metrics = managementService.createMetricsQuery().reporter("notExist").interval(300);
+    List<Metric> metrics = managementService.createMetricsQuery().reporter("notExist").interval(300 * 1000);
 
     //then result contains no metrics from given reporter
     assertEquals(0, metrics.size());
@@ -314,7 +314,7 @@ public class MetricsIntervalTest {
     //given metric data
 
     //when query metric interval data with custom interval and name in where clause
-    List<Metric> metrics = managementService.createMetricsQuery().name("activity-instance-start").interval(300);
+    List<Metric> metrics = managementService.createMetricsQuery().name("activity-instance-start").interval(300 * 1000);
 
     //then result contains only metrics with given name
     assertEquals(200, metrics.size());
@@ -337,7 +337,7 @@ public class MetricsIntervalTest {
     //given metric data
 
     //when query metric interval data with custom interval and non existing name in where clause
-    List<Metric> metrics = managementService.createMetricsQuery().name("notExist").interval(300);
+    List<Metric> metrics = managementService.createMetricsQuery().name("notExist").interval(300 * 1000);
 
     //then result contains no metrics from given name
     assertEquals(0, metrics.size());
@@ -370,7 +370,7 @@ public class MetricsIntervalTest {
     //when query metric interval data with custom interval and second last interval as start date in where clause
     //second last interval = start date = Jan 3, 1970 3:15:00 PM
     Date startDate = new Date(249 * 15 * 60 * 1000);
-    List<Metric> metrics = managementService.createMetricsQuery().startDate(startDate).interval(300);
+    List<Metric> metrics = managementService.createMetricsQuery().startDate(startDate).interval(300 * 1000);
 
     //then result contains 36 entries since 9 different metrics are created
     //intervals Jan 3, 1970 3:15:00 PM, 3:20, 3:25, 3:30
@@ -403,7 +403,7 @@ public class MetricsIntervalTest {
     //when query metric interval data with custom interval and second interval as end date in where clause
     //second interval = end date = Jan 1, 1970 1:30:00 PM
     Date endDate = new Date(2 * 15 * 60 * 1000);
-    List<Metric> metrics = managementService.createMetricsQuery().endDate(endDate).interval(300);
+    List<Metric> metrics = managementService.createMetricsQuery().endDate(endDate).interval(300 * 1000);
 
     //then result contains 54 entries since 9 different metrics are created
     //intervals Jan 1, 1970 1:00:00 PM, 1:05, 1:10, 1:15, 1:20, 1:25
@@ -441,7 +441,7 @@ public class MetricsIntervalTest {
     //start date = Jan 1, 1970 1:15:00 PM
     Date endDate = new Date(2 * 15 * 60 * 1000);
     Date startDate = new Date(1 * 15 * 60 * 1000);
-    List<Metric> metrics = managementService.createMetricsQuery().startDate(startDate).endDate(endDate).interval(300);
+    List<Metric> metrics = managementService.createMetricsQuery().startDate(startDate).endDate(endDate).interval(300 * 1000);
 
     //then result contains 27 entries since 9 different metrics are created
     //intervals Jan 1, 1970 1:15:00 PM, 1:20, 1:25
@@ -492,7 +492,7 @@ public class MetricsIntervalTest {
             .startDate(startDate)
             .endDate(endDate)
             .name("activity-instance-start");
-    List<Metric> metrics = metricQuery.interval(300);
+    List<Metric> metrics = metricQuery.interval(300 * 1000);
     long sum = metricQuery.sum();
 
 
