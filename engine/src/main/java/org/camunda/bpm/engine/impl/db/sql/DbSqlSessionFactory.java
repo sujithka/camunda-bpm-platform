@@ -59,6 +59,12 @@ public class DbSqlSessionFactory implements SessionFactory {
   public static final Map<String, String> databaseSpecificDatepart2 = new HashMap<String, String>();
   public static final Map<String, String> databaseSpecificDatepart3 = new HashMap<String, String>();
 
+  public static final Map<String, String> databaseSpecificToTimestamp1 = new HashMap<String, String>();
+  public static final Map<String, String> databaseSpecificToTimestamp2 = new HashMap<String, String>();
+
+  public static final Map<String, String> databaseSpecificFromTimestamp1 = new HashMap<String, String>();
+  public static final Map<String, String> databaseSpecificFromTimestamp2 = new HashMap<String, String>();
+
   public static final Map<String, String> databaseSpecificDummyTable = new HashMap<String, String>();
 
   public static final Map<String, String> databaseSpecificIfNull = new HashMap<String, String>();
@@ -90,6 +96,10 @@ public class DbSqlSessionFactory implements SessionFactory {
     databaseSpecificDatepart1.put(H2, "");
     databaseSpecificDatepart2.put(H2, "(");
     databaseSpecificDatepart3.put(H2, ")");
+    databaseSpecificFromTimestamp1.put(H2, "DATEADD('ms', ");
+    databaseSpecificFromTimestamp2.put(H2, ", DATE '1970-01-01')");
+    databaseSpecificToTimestamp1.put(H2, "DATEDIFF('ms', '1970-01-01', ");
+    databaseSpecificToTimestamp2.put(H2, ")");
     databaseSpecificDummyTable.put(H2, "");
     databaseSpecificTrueConstant.put(H2, "1");
     databaseSpecificFalseConstant.put(H2, "0");

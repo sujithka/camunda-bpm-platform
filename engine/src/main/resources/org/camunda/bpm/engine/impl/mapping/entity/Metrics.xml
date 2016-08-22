@@ -104,7 +104,7 @@
       NAME_,
       REPORTER_,
       SUM(VALUE_) as VALUE_,
-      DATEADD('ms', FLOOR(DATEDIFF('ms', '1970-01-01', TIMESTAMP_) / #{interval} ) * #{interval}, DATE '1970-01-01') as TIMESTAMP_
+      ${fromTimestamp1} FLOOR( ${toTimestamp1} TIMESTAMP_ ${toTimestamp2} / #{interval} ) * #{interval} ${fromTimestamp2} as TIMESTAMP_
     ${limitBetween}
     <include refid="selectMeterLogsByQueryCriteriaSql"/>
     GROUP BY
