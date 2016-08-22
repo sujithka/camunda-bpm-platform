@@ -91,7 +91,7 @@
 
   <resultMap id="meterResultIntervallMap" type="org.camunda.bpm.engine.impl.persistence.entity.MetricIntervalEntity">
     <constructor>
-      <idArg column="TIMESTAMP_" jdbcType="TIMESTAMP"/>
+      <idArg column="INTERVAL_" jdbcType="TIMESTAMP"/>
       <idArg column="NAME_" javaType="java.lang.String" jdbcType="VARCHAR" />
       <idArg column="REPORTER_" javaType="java.lang.String" jdbcType="VARCHAR"/>
    </constructor>
@@ -104,14 +104,14 @@
       NAME_,
       REPORTER_,
       SUM(VALUE_) as VALUE_,
-      ${fromTimestamp1} FLOOR( ${toTimestamp1} TIMESTAMP_ ${toTimestamp2} / #{interval} ) * #{interval} ${fromTimestamp2} as TIMESTAMP_
+      ${fromTimestamp1} FLOOR( ${toTimestamp1} TIMESTAMP_ ${toTimestamp2} / #{interval} ) * #{interval} ${fromTimestamp2} as INTERVAL_
     ${limitBetween}
     <include refid="selectMeterLogsByQueryCriteriaSql"/>
     GROUP BY
       NAME_,
       REPORTER_,
-      TIMESTAMP_
-    ORDER BY TIMESTAMP_ DESC
+      INTERVAL_
+    ORDER BY INTERVAL_ DESC
     ${limitAfter}
   </select>
 

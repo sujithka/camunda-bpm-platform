@@ -96,9 +96,9 @@ public class DbSqlSessionFactory implements SessionFactory {
     databaseSpecificDatepart1.put(H2, "");
     databaseSpecificDatepart2.put(H2, "(");
     databaseSpecificDatepart3.put(H2, ")");
-    databaseSpecificFromTimestamp1.put(H2, "DATEADD('ms', ");
+    databaseSpecificFromTimestamp1.put(H2, "DATEADD('s', ");
     databaseSpecificFromTimestamp2.put(H2, ", DATE '1970-01-01')");
-    databaseSpecificToTimestamp1.put(H2, "DATEDIFF('ms', '1970-01-01', ");
+    databaseSpecificToTimestamp1.put(H2, "DATEDIFF('s', '1970-01-01', ");
     databaseSpecificToTimestamp2.put(H2, ")");
     databaseSpecificDummyTable.put(H2, "");
     databaseSpecificTrueConstant.put(H2, "1");
@@ -132,6 +132,10 @@ public class DbSqlSessionFactory implements SessionFactory {
       databaseSpecificDatepart1.put(mysqlLikeDatabase, "");
       databaseSpecificDatepart2.put(mysqlLikeDatabase, "(");
       databaseSpecificDatepart3.put(mysqlLikeDatabase, ")");
+      databaseSpecificFromTimestamp1.put(mysqlLikeDatabase, "FROM_UNIXTIME(");
+      databaseSpecificFromTimestamp2.put(mysqlLikeDatabase, ")");
+      databaseSpecificToTimestamp1.put(mysqlLikeDatabase, "UNIX_TIMESTAMP(");
+      databaseSpecificToTimestamp2.put(mysqlLikeDatabase, ")");
       databaseSpecificDummyTable.put(mysqlLikeDatabase, "");
       databaseSpecificTrueConstant.put(mysqlLikeDatabase, "1");
       databaseSpecificFalseConstant.put(mysqlLikeDatabase, "0");
