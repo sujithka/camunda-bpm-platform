@@ -98,10 +98,20 @@
     <result property="value" column="VALUE_" jdbcType="BIGINT" />
   </resultMap>
 
-  <select id="selectMeterLogAggregatedByTimeInterval"  parameterType="org.camunda.bpm.engine.impl.metrics.MetricsQueryImpl" resultMap="meterResultIntervallMap">
-    ${limitBefore}
+  <select id="selectMeterLogAggregatedByTimeInterval_db2"  parameterType="org.camunda.bpm.engine.impl.metrics.MetricsQueryImpl" resultMap="meterResultIntervallMap">
+    SELECT NAME_, REPORTER_, VALUE_, INTERVAL_
+    FROM (
+      SELECT row_number() OVER ( ORDER BY INTERVAL_ DESC, NAME_ DESC, REPORTER_ DESC) AS rid, RES.*
+      FROM (
+        <include refid="selectMeterLogAggregatedByTimeIntervalQuery"/>
+      ) RES
+    ) RES
+    WHERE RES.rid BETWEEN #{firstRow} AND #{lastRow}-1
+    ORDER BY INTERVAL_ DESC
+  </select>
+
+  <sql id="selectMeterLogAggregatedByTimeIntervalQuery" >
     SELECT NAME_, REPORTER_, SUM(VALUE_) as VALUE_, INTERVAL_
-    ${limitBetween}
     FROM
     (
       SELECT
@@ -115,6 +125,11 @@
       NAME_,
       REPORTER_,
       INTERVAL_
+  </sql>
+
+  <select id="selectMeterLogAggregatedByTimeInterval"  parameterType="org.camunda.bpm.engine.impl.metrics.MetricsQueryImpl" resultMap="meterResultIntervallMap">
+    ${limitBefore}
+    <include refid="selectMeterLogAggregatedByTimeIntervalQuery"/>
     ORDER BY INTERVAL_ DESC
     ${limitAfter}
   </select>

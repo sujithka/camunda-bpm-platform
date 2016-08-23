@@ -263,10 +263,15 @@ public class DbSqlSessionFactory implements SessionFactory {
     databaseSpecificDatepart1.put(DB2, "");
     databaseSpecificDatepart2.put(DB2, "(");
     databaseSpecificDatepart3.put(DB2, ")");
+    databaseSpecificFromTimestamp1.put(DB2, "timestamp('1970-01-01') + (");
+    databaseSpecificFromTimestamp2.put(DB2, ") SECONDS");
+    databaseSpecificToTimestamp1.put(DB2, "CAST (DAYS(");
+    databaseSpecificToTimestamp2.put(DB2, ") - DAYS('1970-01-01') AS INTEGER) * 86400 + MIDNIGHT_SECONDS(TIMESTAMP_)");
     databaseSpecificDummyTable.put(DB2, "FROM SYSIBM.SYSDUMMY1");
     databaseSpecificTrueConstant.put(DB2, "1");
     databaseSpecificFalseConstant.put(DB2, "0");
     databaseSpecificIfNull.put(DB2, "NVL");
+    addDatabaseSpecificStatement(DB2, "selectMeterLogAggregatedByTimeInterval", "selectMeterLogAggregatedByTimeInterval_db2");
     addDatabaseSpecificStatement(DB2, "selectExecutionByNativeQuery", "selectExecutionByNativeQuery_mssql_or_db2");
     addDatabaseSpecificStatement(DB2, "selectHistoricActivityInstanceByNativeQuery", "selectHistoricActivityInstanceByNativeQuery_mssql_or_db2");
     addDatabaseSpecificStatement(DB2, "selectHistoricCaseActivityInstanceByNativeQuery", "selectHistoricCaseActivityInstanceByNativeQuery_mssql_or_db2");
