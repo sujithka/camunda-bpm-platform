@@ -30,13 +30,18 @@ import org.camunda.bpm.engine.management.Metric;
  */
 public class MeterLogManager extends AbstractManager {
 
+  public static final String SELECT_METER_INTERVAL = "selectMeterLogAggregatedByTimeInterval";
+  public static final String SELECT_METER_SUM = "selectMeterLogSum";
+  public static final String DELETE_ALL_METER = "deleteAllMeterLogEntries";
+  public static final String DELETE_ALL_METER_BY_TIMESTAMP_AND_REPORTER = "deleteMeterLogEntriesByTimestampAndReporter";
+
   public void insert(MeterLogEntity meterLogEntity) {
     getDbEntityManager()
      .insert(meterLogEntity);
   }
 
   public Long executeSelectSum(MetricsQueryImpl query) {
-    Long result = (Long) getDbEntityManager().selectOne("selectMeterLogSum", query);
+    Long result = (Long) getDbEntityManager().selectOne(SELECT_METER_SUM, query);
     result = result != null ? result : 0;
 
     if(shouldAddCurrentUnloggedCount(query)) {
@@ -53,7 +58,7 @@ public class MeterLogManager extends AbstractManager {
   }
 
   public List<Metric> executeSelectInterval(MetricsQueryImpl query) {
-    return getDbEntityManager().selectList("selectMeterLogAggregatedByTimeInterval", query);
+    return getDbEntityManager().selectList(SELECT_METER_INTERVAL, query);
   }
 
   protected boolean shouldAddCurrentUnloggedCount(MetricsQueryImpl query) {
@@ -69,14 +74,14 @@ public class MeterLogManager extends AbstractManager {
   }
 
   public void deleteAll() {
-    getDbEntityManager().delete(MeterLogEntity.class, "deleteAllMeterLogEntries", null);
+    getDbEntityManager().delete(MeterLogEntity.class, DELETE_ALL_METER, null);
   }
 
   public void deleteByTimestampAndReporter(Date timestamp, String reporter) {
     Map<String, Object> parameters = new HashMap<String, Object>();
     parameters.put("timestamp", timestamp);
     parameters.put("reporter", reporter);
-    getDbEntityManager().delete(MeterLogEntity.class, "deleteMeterLogEntriesByTimestampAndReporter", parameters);
+    getDbEntityManager().delete(MeterLogEntity.class, DELETE_ALL_METER_BY_TIMESTAMP_AND_REPORTER, parameters);
   }
 
 }
