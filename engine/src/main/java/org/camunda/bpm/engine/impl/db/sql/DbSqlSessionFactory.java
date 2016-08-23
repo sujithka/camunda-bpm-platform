@@ -227,6 +227,10 @@ public class DbSqlSessionFactory implements SessionFactory {
     databaseSpecificDatepart1.put(ORACLE, "to_number(to_char(");
     databaseSpecificDatepart2.put(ORACLE, ",");
     databaseSpecificDatepart3.put(ORACLE, "))");
+    databaseSpecificFromTimestamp1.put(ORACLE, "TO_DATE('1970-01-01','YYYY-MM-DD') + (");
+    databaseSpecificFromTimestamp2.put(ORACLE, "/ (24 * 60 * 60)) ");
+    databaseSpecificToTimestamp1.put(ORACLE, "((CAST(");
+    databaseSpecificToTimestamp2.put(ORACLE, " as date)-TO_DATE('01.01.1970','dd.mm.yyyy')) * 24 * 60 * 60)");
     databaseSpecificTrueConstant.put(ORACLE, "1");
     databaseSpecificFalseConstant.put(ORACLE, "0");
     databaseSpecificIfNull.put(ORACLE, "NVL");

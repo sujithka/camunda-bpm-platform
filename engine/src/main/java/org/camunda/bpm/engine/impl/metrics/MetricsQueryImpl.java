@@ -45,6 +45,8 @@ public class MetricsQueryImpl extends ListQueryParameterObject implements Serial
 
   public MetricsQueryImpl(CommandExecutor commandExecutor) {
     this.commandExecutor = commandExecutor;
+    this.maxResults = DEFAULT_LIMIT_SELECT_INTERVAL;
+    this.interval = DEFAULT_SELECT_INTERVAL;
   }
 
   public MetricsQueryImpl name(String name) {

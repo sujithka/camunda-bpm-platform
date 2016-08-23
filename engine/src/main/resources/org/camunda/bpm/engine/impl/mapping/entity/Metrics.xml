@@ -100,13 +100,17 @@
 
   <select id="selectMeterLogAggregatedByTimeInterval"  parameterType="org.camunda.bpm.engine.impl.metrics.MetricsQueryImpl" resultMap="meterResultIntervallMap">
     ${limitBefore}
-    SELECT
-      NAME_,
-      REPORTER_,
-      SUM(VALUE_) as VALUE_,
-      ${fromTimestamp1} FLOOR( ${toTimestamp1} TIMESTAMP_ ${toTimestamp2} / #{interval} ) * #{interval} ${fromTimestamp2} as INTERVAL_
+    SELECT NAME_, REPORTER_, SUM(VALUE_) as VALUE_, INTERVAL_
     ${limitBetween}
-    <include refid="selectMeterLogsByQueryCriteriaSql"/>
+    FROM
+    (
+      SELECT
+        NAME_,
+        REPORTER_,
+        VALUE_,
+        ${fromTimestamp1} FLOOR( ${toTimestamp1} TIMESTAMP_ ${toTimestamp2} / #{interval} ) * #{interval} ${fromTimestamp2} as INTERVAL_
+      <include refid="selectMeterLogsByQueryCriteriaSql"/>
+    ) RES
     GROUP BY
       NAME_,
       REPORTER_,
