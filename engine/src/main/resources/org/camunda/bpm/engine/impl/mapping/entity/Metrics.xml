@@ -98,7 +98,7 @@
     <result property="value" column="VALUE_" jdbcType="BIGINT" />
   </resultMap>
 
-  <select id="selectMeterLogAggregatedByTimeInterval_db2"  parameterType="org.camunda.bpm.engine.impl.metrics.MetricsQueryImpl" resultMap="meterResultIntervallMap">
+  <select id="selectMeterLogAggregatedByTimeInterval_db2_or_mssql"  parameterType="org.camunda.bpm.engine.impl.metrics.MetricsQueryImpl" resultMap="meterResultIntervallMap">
     SELECT NAME_, REPORTER_, VALUE_, INTERVAL_
     FROM (
       SELECT row_number() OVER ( ORDER BY INTERVAL_ DESC, NAME_ DESC, REPORTER_ DESC) AS rid, RES.*
