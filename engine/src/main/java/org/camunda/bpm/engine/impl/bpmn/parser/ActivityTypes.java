@@ -24,6 +24,7 @@ public class ActivityTypes {
   public static final String BOUNDARY_MESSAGE = "boundaryMessage";
   public static final String BOUNDARY_SIGNAL = "boundarySignal";
   public static final String BOUNDARY_COMPENSATION = "compensationBoundaryCatch";
+  public static final String BOUNDARY_CONDITIONAL = "boundaryConditional";
 
   public static final String START_EVENT = "startEvent";
   public static final String START_EVENT_TIMER = "startTimerEvent";
