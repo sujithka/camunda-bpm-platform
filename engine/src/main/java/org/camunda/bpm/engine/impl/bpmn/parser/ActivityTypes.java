@@ -36,5 +36,6 @@ public class ActivityTypes {
 
   public static final String INTERMEDIATE_EVENT_MESSAGE = "intermediateMessageCatch";
   public static final String INTERMEDIATE_EVENT_TIMER = "intermediateTimer";
+  public static final String INTERMEDIATE_EVENT_CONDITIONAL = "intermediateConditional";
 
 }
