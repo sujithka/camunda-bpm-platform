@@ -53,6 +53,7 @@ import org.camunda.bpm.engine.impl.bpmn.behavior.ExternalTaskActivityBehavior;
 import org.camunda.bpm.engine.impl.bpmn.behavior.InclusiveGatewayActivityBehavior;
 import org.camunda.bpm.engine.impl.bpmn.behavior.IntermediateCatchEventActivityBehavior;
 import org.camunda.bpm.engine.impl.bpmn.behavior.IntermediateCatchLinkEventActivityBehavior;
+import org.camunda.bpm.engine.impl.bpmn.behavior.IntermediateConditionalEventBehavior;
 import org.camunda.bpm.engine.impl.bpmn.behavior.IntermediateThrowNoneEventActivityBehavior;
 import org.camunda.bpm.engine.impl.bpmn.behavior.IntermediateThrowSignalEventActivityBehavior;
 import org.camunda.bpm.engine.impl.bpmn.behavior.MailActivityBehavior;
@@ -1402,8 +1403,9 @@ public class BpmnParse extends Parse {
     IntermediateCatchEventActivityBehavior defaultCatchBehaviour = new IntermediateCatchEventActivityBehavior(eventBasedGateway != null);
 
     parseAsynchronousContinuationForActivity(intermediateEventElement, nestedActivity);
+    boolean isEventBaseGatewayPresent = eventBasedGateway != null;
 
-    if (eventBasedGateway != null) {
+    if (isEventBaseGatewayPresent) {
       nestedActivity.setEventScope(eventBasedGateway);
       nestedActivity.setActivityStartBehavior(ActivityStartBehavior.CANCEL_EVENT_SCOPE);
     } else {
@@ -1422,14 +1424,15 @@ public class BpmnParse extends Parse {
       parseIntermediateMessageEventDefinition(messageEventDefinition, nestedActivity);
 
     } else if (linkEventDefinitionElement != null) {
-      if (eventBasedGateway != null) {
+      if (isEventBaseGatewayPresent) {
         addError("IntermediateCatchLinkEvent is not allowed after an EventBasedGateway.", intermediateEventElement);
       }
       nestedActivity.setActivityBehavior(new IntermediateCatchLinkEventActivityBehavior());
       parseIntermediateLinkEventCatchBehavior(intermediateEventElement, nestedActivity, linkEventDefinitionElement);
 
     } else if (conditionalEventDefinitionElement != null) {
-      parseIntermediateConditionalEventDefinition(conditionalEventDefinitionElement, nestedActivity);
+      ConditionalEventDefinition conditionalEvent = parseIntermediateConditionalEventDefinition(conditionalEventDefinitionElement, nestedActivity);
+      nestedActivity.setActivityBehavior(new IntermediateConditionalEventBehavior(conditionalEvent, isEventBaseGatewayPresent));
     } else {
       addError("Unsupported intermediate catch event type", intermediateEventElement);
     }
@@ -3430,7 +3433,7 @@ public class BpmnParse extends Parse {
    * @param conditionalActivity the conditional event activity
    * @return returns the conditional activity with the parsed information
    */
-  public ActivityImpl parseIntermediateConditionalEventDefinition(Element element, ActivityImpl conditionalActivity) {
+  public ConditionalEventDefinition parseIntermediateConditionalEventDefinition(Element element, ActivityImpl conditionalActivity) {
     conditionalActivity.getProperties().set(BpmnProperties.TYPE, ActivityTypes.INTERMEDIATE_EVENT_CONDITIONAL);
 
     ConditionalEventDefinition conditionalEventDefinition = parseConditionalEventDefinition(element, conditionalActivity);
@@ -3439,7 +3442,8 @@ public class BpmnParse extends Parse {
     for (BpmnParseListener parseListener : parseListeners) {
       parseListener.parseIntermediateConditionalEventDefinition(element, conditionalActivity);
     }
-    return conditionalActivity;
+
+    return conditionalEventDefinition;
   }
 
   /**
@@ -3472,12 +3476,12 @@ public class BpmnParse extends Parse {
    * @return the conditional event definition which was parsed
    */
   protected ConditionalEventDefinition parseConditionalEventDefinition(Element element, ActivityImpl conditionalActivity) {
-    ConditionalEventDefinition conditionalEventDefinition = new ConditionalEventDefinition(conditionalActivity.getName(), conditionalActivity.getId());
+    ConditionalEventDefinition conditionalEventDefinition = null;
 
     Element conditionExprElement = element.element(CONDITION);
     if (conditionExprElement != null) {
       Condition condition = parseConditionExpression(conditionExprElement);
-      conditionalEventDefinition.setConditionalExpression(condition);
+      conditionalEventDefinition = new ConditionalEventDefinition(condition, conditionalActivity.getName(), conditionalActivity.getId());
     } else {
       addError("Conditional event must contain an expression for evaluation.", element);
     }
